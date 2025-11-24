@@ -6,6 +6,7 @@
         <item
             android:id="@+id/navigation_item_delPick"
             android:icon="@drawable/ic_receipt"
+            android:visible="false"
             android:title="Delivery PickList" />
     </group>
 
@@ -15,10 +16,27 @@
         <item
             android:id="@+id/navigation_item_trackingInv"
             android:icon="@drawable/location_64"
+            android:visible="false"
             android:title="Tracking Invoice List" />
 
     </group>
+    <group
+        android:id="@+id/drawermenu_group_67">
+        <item
+            android:icon="@drawable/ic_baseline_transform_24"
+            android:id="@+id/navigation_transfer"
+            android:title="Transfer" />
 
+    </group>
+
+    <group
+        android:id="@+id/drawermenu_group_60">
+        <item
+            android:icon="@drawable/navi_stockreq"
+            android:id="@+id/navigation_stock_request"
+            android:title="Stock Request" />
+
+    </group>
     <group
         android:id="@+id/drawermenu_group_4"
         >

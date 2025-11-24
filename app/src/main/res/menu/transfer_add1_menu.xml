@@ -1,0 +1,17 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".activity.MainActivity">
+    <item
+        android:id="@+id/action_scan"
+        android:icon="@drawable/barcode_white64"
+        android:title="Add"
+        android:orderInCategory="100"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_save1"
+        android:icon="@drawable/ic_baseline_save_24"
+        android:title="Add"
+        android:orderInCategory="100"
+        app:showAsAction="always" />
+</menu>

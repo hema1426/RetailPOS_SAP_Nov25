@@ -8,10 +8,10 @@ plugins {
 
 android {
     compileSdk 33
-    namespace 'com.winapp.deliverytrackingapp'
+    namespace 'com.winapp.retailpos_sap'
 
     defaultConfig {
-        applicationId "com.winapp.deliverytrackingapp"
+        applicationId "com.winapp.retailpos_sap"
         minSdk 24
         targetSdk 33
         versionCode 1

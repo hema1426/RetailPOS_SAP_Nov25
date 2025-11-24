@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="purple_200">#1085BC</color>
-    <color name="colorPrimary">#2791c2</color>
-    <color name="colorPrimaryDark">#1d81b6</color>
-    <color name="colorAccent">#bc9d10</color>
+    <color name="colorPrimary">#6a358e</color>
+    <color name="colorPrimaryDark">#5f2f7f</color>
+    <color name="colorAccent">#8e3586</color>
+
+    <color name="primary">@color/colorPrimary</color>
     <color name="black">#292929</color>
     <color name="white">#FFF</color>
     <color name="secondaryColor">#0860A4</color>
     <color name="thin_blue">#3655D2</color>
+    <color name="thin_yellow">#868e35</color>
 
     <color name="black_87">#DE000000</color>
     <color name="pink_clr">#724357</color>
@@ -48,6 +51,7 @@
     <color name="btn_clr">#88773F</color>
     <color name="btn_pink">#AC6277</color>
     <color name="btn_clr2">#574A4E</color>
+    <color name="colorGreen">#2ECC71</color>
 
     <color name="text_black_primary">@color/black_87</color>
 

@@ -23,7 +23,7 @@
 <!--    </style>-->
 
     <style name="RobotoTextViewStyle" parent="android:Widget.TextView">
-        <item name="android:fontFamily">sans-serif</item>
+        <item name="fontFamily">@font/poppins_reqular</item>
     </style>
 
     <style name="RobotoButtonStyle" parent="android:Widget.Holo.Button">

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">delivery Tracking</string>
+    <string name="app_name">Retail POS</string>
 
     <string name="splash_win">Powered by Winapp solutions Pte Ltd</string>
 
@@ -11,9 +11,17 @@
     <string name="release">Release</string>
     <string name="invoice_prompt">Choose a Status</string>
     <string name="search_pdt">Search Product</string>
+    <string name="cash_collected">Cash Collected</string>
+    <string name="invoice_print">Invoice Print</string>
+    <string name="delivery_order_print">Delivery Order Print</string>
+    <string name="save_and_print">Save and Print</string>
+    <string name="no_of_copies">No of Copies ?</string>
+    <string name="email_invoice">Email Invoice</string>
 
-
-
+    <string name="stock_hand">Stock in Hand : </string>
+    <string name="qty_txt">Qty : </string>
+    <string name="transfer_in">TRANSFER IN</string>
+    <string name="transfer_out">TRANSFER OUT</string>
 
     <string-array name="sales_arrays">
         <item>ALL</item>

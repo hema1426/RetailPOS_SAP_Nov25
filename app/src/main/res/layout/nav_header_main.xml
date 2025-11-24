@@ -42,7 +42,7 @@
             >
         <ImageView
             android:layout_width="50dp"
-            android:src="@drawable/tracking_white"
+            android:src="@drawable/retail_icon1"
             android:layout_marginTop="30dp"
             android:layout_height="50dp"
             />
