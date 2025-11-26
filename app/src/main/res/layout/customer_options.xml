@@ -101,7 +101,7 @@
                 android:layout_marginLeft="10dp"
                 android:textSize="12sp"
                 android:textStyle="bold"
-                android:textColor="#1d81b6"
+                android:textColor="#6a358e"
                 android:layout_height="wrap_content"/>
 
             <Space
@@ -140,7 +140,7 @@
                 android:layout_marginLeft="10dp"
                 android:textSize="12sp"
                 android:textStyle="bold"
-                android:textColor="#1d81b6"
+                android:textColor="#6a358e"
                 android:layout_height="wrap_content"/>
 
             <Space
@@ -180,7 +180,7 @@
                 android:layout_marginLeft="10dp"
                 android:textSize="12sp"
                 android:textStyle="bold"
-                android:textColor="#1d81b6"
+                android:textColor="#6a358e"
                 android:layout_height="wrap_content"/>
 
             <Space
@@ -222,7 +222,7 @@
                 android:layout_marginLeft="10dp"
                 android:textSize="12sp"
                 android:textStyle="bold"
-                android:textColor="#1d81b6"
+                android:textColor="#6a358e"
                 android:layout_height="wrap_content"/>
 
             <Space
@@ -262,7 +262,7 @@
                 android:layout_marginLeft="10dp"
                 android:textSize="12sp"
                 android:textStyle="bold"
-                android:textColor="#1d81b6"
+                android:textColor="#6a358e"
                 android:layout_height="wrap_content"/>
 
             <Space
@@ -341,7 +341,7 @@
                 android:layout_marginLeft="10dp"
                 android:textSize="12sp"
                 android:textStyle="bold"
-                android:textColor="#1d81b6"
+                android:textColor="#6a358e"
                 android:layout_height="wrap_content"/>
 
             <Space
@@ -380,7 +380,7 @@
                 android:layout_marginLeft="10dp"
                 android:textSize="12sp"
                 android:textStyle="bold"
-                android:textColor="#1d81b6"
+                android:textColor="#6a358e"
                 android:layout_height="wrap_content"/>
 
             <Space
@@ -419,7 +419,7 @@
                 android:layout_marginLeft="10dp"
                 android:textSize="12sp"
                 android:textStyle="bold"
-                android:textColor="#1d81b6"
+                android:textColor="#6a358e"
                 android:layout_height="wrap_content"/>
 
             <Space

@@ -6,3 +6,7 @@ SALES1
 
 KH cycle Delivery app
 "Username":"SALES1","Password":"KH@12345"
+
+Retail  POS Demo
+http://172.16.5.72:91/api/Login
+{"Username":"SALES1","Password":"12345"}

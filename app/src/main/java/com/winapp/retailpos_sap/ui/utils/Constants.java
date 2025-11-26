@@ -29,7 +29,7 @@ public class Constants extends BaseApp {
 
 //  public static String BASEURL = "http://136.243.60.223:8090/api/";
 
-    public static String BASEURL = "https://c21326-easysales-onlytesting.cloudiax.com/api/";
+    public static String BASEURL = "http://172.16.5.72:91/api/";
 
   //  TRANS_ORIENT_DEMO ="https://c21326-easysales-onlytesting.cloudiax.com/api/";
    // WMS_KH_CYCLE_DELIVERY_DEMO ="http://136.243.60.223:8090/api/";
