@@ -61,7 +61,7 @@ public class TransferPreviewPrintActivity extends AppCompatActivity {
     String printerType;
     private ArrayList<TransferDetailModel> transferDetailModels;
     private ArrayList<TransferDetailModel.TransferDetails> transferDetailsList;
-    private TextView transfertype, transferno, from_locat,to_locat,transferdate ,toloc_namel,fromloc_namel;
+    private TextView transfertype, transfertitle,transferno, from_locat,to_locat,transferdate ,toloc_namel,fromloc_namel;
     private RecyclerView transferListView;
     private TransferPreviewPrintAdapter adapter;
     SessionManager session;
@@ -107,6 +107,7 @@ public class TransferPreviewPrintActivity extends AppCompatActivity {
         toloc_namel =findViewById (R.id.toloc_name);
         fromloc_namel =findViewById (R.id.fromloc_name);
         transferdate =findViewById (R.id.transfer_date);
+        transfertitle =findViewById (R.id.title_trans);
         mainLayout=findViewById(R.id.main_layout);
         transferListView = findViewById (R.id.rv_transferlist);
         setCompanyDetails();
@@ -116,12 +117,19 @@ public class TransferPreviewPrintActivity extends AppCompatActivity {
                 if (getIntent().getStringExtra("title").equals("Stock Request")){
                     transferNo=getIntent().getStringExtra("transferNumber");
                     type=getIntent().getStringExtra("title");
-                    setTitle(getIntent().getStringExtra("title"));
+                    Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+                    getSupportActionBar().setTitle(type);
+                    transfertitle.setText(type);
+                   // setTitle(getIntent().getStringExtra("title"));
                     getStockRequestDetails(transferNo,"Stock Request");
                 }else {
                     transferNo=getIntent().getStringExtra("transferNumber");
                     type=getIntent().getStringExtra("title");
-                    setTitle(getIntent().getStringExtra("title"));
+                    Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+                    getSupportActionBar().setTitle(type);
+                    transfertitle.setText(type);
+
+                    // setTitle(getIntent().getStringExtra("title"));
                     getTransferDetails(transferNo,"TransferIn");
                 }
             }
@@ -133,27 +141,27 @@ public class TransferPreviewPrintActivity extends AppCompatActivity {
 
     private void setCompanyDetails(){
         companyNametext.setText(company_name);
-        if (!company_address1.isEmpty()){
+        if (company_address1  != null && !company_address1.isEmpty()){
             companyAddress1Text.setVisibility(View.VISIBLE);
             companyAddress1Text.setText(company_address1);
         }
 
-        if (!company_address2.isEmpty()){
+        if (company_address2  != null  && !company_address2.isEmpty()){
             companyAddress2Text.setVisibility(View.VISIBLE);
             companyAddress2Text.setText(company_address2);
         }
 
-        if (!company_address3.isEmpty()){
+        if (company_address3  != null  && !company_address3.isEmpty()){
             companyAddress3Text.setVisibility(View.VISIBLE);
             companyAddress3Text.setText(company_address3);
         }
 
-        if (!company_phone.isEmpty()){
+        if (company_phone  != null  && !company_phone.isEmpty()){
             companyPhoneText.setText("TEL : "+company_phone);
             companyPhoneText.setVisibility(View.VISIBLE);
         }
 
-        if (!company_gst.isEmpty()){
+        if (company_gst  != null  && !company_gst.isEmpty()){
             companyGstText.setText("CO REG NO : "+company_gst);
             companyGstText.setVisibility(View.VISIBLE);
         }

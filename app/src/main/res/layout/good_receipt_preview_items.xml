@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardlist_item"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="0dp"
+        android:layout_margin="0dp"
+        android:layout_marginTop="0dp"
+        android:orientation="vertical"
+        card_view:cardBackgroundColor="@android:color/white"
+        card_view:cardCornerRadius="5dp"
+        card_view:cardUseCompatPadding="true"
+        card_view:cardElevation="@dimen/cardview_default_elevation"
+        tools:ignore="MissingDefaultResource">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:id="@+id/main_layout"
+            android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="top"
+            android:gravity="center"
+            android:layout_weight="1"
+            android:id="@+id/item_code_prev"
+            android:textStyle="bold"
+            android:textColor="#212121"
+            android:background="@drawable/table_content_cell_bg"
+            android:text="Code"
+            android:textSize="12sp"
+            />
+
+        <View
+            android:layout_width="1dip"
+            android:background="#f2f2f2"
+            android:layout_height="match_parent"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="top"
+            android:gravity="left"
+            android:layout_weight="2"
+            android:textStyle="bold"
+            android:id="@+id/product_name_prev"
+            android:textColor="#212121"
+            android:background="@drawable/table_content_cell_bg"
+            android:text="Item Descrition"
+            android:textSize="12sp"
+            />
+        <View
+            android:layout_width="1dip"
+            android:background="#f2f2f2"
+            android:layout_height="match_parent"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="top"
+            android:gravity="center"
+            android:layout_weight="1"
+            android:id="@+id/uom_item_prev"
+            android:textStyle="bold"
+            android:textColor="#212121"
+            android:background="@drawable/table_content_cell_bg"
+            android:text=""
+            android:textSize="12sp"
+            />
+
+        <View
+            android:layout_width="1dip"
+            android:background="#f2f2f2"
+            android:layout_height="match_parent"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:visibility="visible"
+            android:layout_gravity="top"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:id="@+id/net_qty_prev"
+            android:textStyle="bold"
+            android:textColor="#212121"
+            android:background="@drawable/table_content_cell_bg"
+            android:text="Net Qty"
+            android:textSize="12sp"
+            />
+        <View
+            android:layout_width="1dip"
+            android:background="#f2f2f2"
+            android:layout_height="match_parent"/>
+        <ImageView
+            android:layout_width="40dp"
+            android:id="@+id/show_hide_prev"
+            android:tag="hide"
+            android:padding="8dp"
+            android:visibility="gone"
+            android:layout_gravity="center"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_baseline_keyboard_arrow_down_24"
+            android:layout_height="match_parent"/>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:background="#f3f3f3"
+        android:visibility="gone"
+        android:layout_height="1dip"/>
+        <LinearLayout
+            android:id="@+id/batch_lay_prev"
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:layout_margin="7dp"
+            android:visibility="gone"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:padding="3dp"
+                android:background="@color/lit_grey_new"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="50dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="top"
+                    android:textStyle="bold"
+                    android:textColor="#3655D2"
+                    android:text="SNO"
+                    android:textSize="11sp"
+                    />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="top"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:textStyle="bold"
+                    android:textColor="#3655D2"
+                    android:text="Batch No"
+                    android:textSize="11sp"
+
+                    />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="top"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:textStyle="bold"
+                    android:textColor="#3655D2"
+                    android:text="Batch Qty"
+                    android:textSize="11sp"
+
+                    />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:background="#f5f5f5"
+                android:layout_height="1dip"/>
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+               >
+            <TextView
+                android:layout_width="wrap_content"
+                android:text="No Batch !"
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="90dp"
+                android:id="@+id/empty_batch_Pre"
+                android:padding="10dp"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:layout_height="wrap_content"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_batchList_prev"
+                android:layout_width="match_parent"
+                tools:listitem="@layout/batch_receipt_prev_item"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+            </RelativeLayout>
+        </LinearLayout>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+</LinearLayout>

@@ -34,6 +34,33 @@ public class ProductsModel {
     private String barcode;
     private String isItemFOC;
     private String isBatch;
+    private String committedQty;
+    private String inStockQty;
+    private String availableQty;
+
+    public String getCommittedQty() {
+        return committedQty;
+    }
+
+    public void setCommittedQty(String committedQty) {
+        this.committedQty = committedQty;
+    }
+
+    public String getInStockQty() {
+        return inStockQty;
+    }
+
+    public void setInStockQty(String inStockQty) {
+        this.inStockQty = inStockQty;
+    }
+
+    public String getAvailableQty() {
+        return availableQty;
+    }
+
+    public void setAvailableQty(String availableQty) {
+        this.availableQty = availableQty;
+    }
 
     public String getIsBatch() {
         return isBatch;

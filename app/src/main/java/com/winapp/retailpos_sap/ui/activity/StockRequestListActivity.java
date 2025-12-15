@@ -81,7 +81,7 @@ public class StockRequestListActivity extends NavigationActivity implements View
     ArrayList<TransferDetailModel.TransferDetails> transferDetailsList;
     public String transferType = "Transfer In";
     public Button addRequest;
-    public TextView emptyText;
+    public TextView emptyText , transferSize;
     public TextView requestNoTitle;
     public String currentDate = "";
     private TextView fromDate;
@@ -114,6 +114,7 @@ public class StockRequestListActivity extends NavigationActivity implements View
         stockRequestText =findViewById(R.id.transfer_search);
         addRequest =findViewById(R.id.add_transfer);
         emptyText=findViewById(R.id.empty_text);
+        transferSize = findViewById(R.id.stockreq_size);
         requestNoTitle=findViewById(R.id.transfer_no);
         requestSentView=findViewById(R.id.request_sent_view);
         requestReceiveView=findViewById(R.id.request_receive_view);
@@ -343,14 +344,17 @@ public class StockRequestListActivity extends NavigationActivity implements View
                             if (requestList.size()>0){
                                 stockRequestList.setVisibility(View.VISIBLE);
                                 emptyText.setVisibility(View.GONE);
+                                searchFilterView.setVisibility(View.GONE);
                                 setTransferListAdapter(requestList);
                             }else {
                                 stockRequestList.setVisibility(View.GONE);
                                 emptyText.setVisibility(View.VISIBLE);
+                                transferSize.setText("(0) Products") ;
                             }
                         }else {
                             stockRequestList.setVisibility(View.GONE);
                             emptyText.setVisibility(View.VISIBLE);
+                            transferSize.setText("(0) Products") ;
                             Toast.makeText(getApplicationContext(),statusMessage,Toast.LENGTH_LONG).show();
                         }
                     }catch (Exception e){
@@ -390,7 +394,9 @@ public class StockRequestListActivity extends NavigationActivity implements View
     }
 
     public void setTransferListAdapter(ArrayList<TransferModel> stockRequestList){
-        try {
+        //try {
+            transferSize.setText("(" + stockRequestList.size() + ")" + " Products") ;
+
             requestAdapter = new TransferAdapter(this, stockRequestList, new TransferAdapter.CallBack() {
                 @Override
                 public void callDescription(String requestNo,String mode) {
@@ -424,9 +430,9 @@ public class StockRequestListActivity extends NavigationActivity implements View
             this.stockRequestList.setAdapter(requestAdapter);
             //categoriesView.setVisibility(View.VISIBLE);
             //emptyLayout.setVisibility(View.GONE);
-        }catch (Exception ex){
-            Log.e("TAG","Error in Populating the data:"+ex.getMessage());
-        }
+//        }catch (Exception ex){
+//            Log.e("TAG","Error in Populating the data:"+ex.getMessage());
+//        }
     }
 
     private void getStockRequestDetails(int copy, String transferNo, String type,String action) throws JSONException {
@@ -552,8 +558,8 @@ public class StockRequestListActivity extends NavigationActivity implements View
                     "",
                     "",
                     "",
-                    "0","",
-                    "","","","","","","",""
+                    "0",
+                    "","","","",""
             );
         }
         int count=dbHelper.numberOfRowsInInvoice();

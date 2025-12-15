@@ -4,10 +4,9 @@
         android:id="@+id/drawermenu_group_1"
         >
         <item
-            android:id="@+id/navigation_item_delPick"
+            android:id="@+id/navigation_item_delivery"
             android:icon="@drawable/ic_receipt"
-            android:visible="false"
-            android:title="Delivery PickList" />
+            android:title="Delivery List" />
     </group>
 
     <group

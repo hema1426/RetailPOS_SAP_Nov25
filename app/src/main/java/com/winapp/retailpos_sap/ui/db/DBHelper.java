@@ -10,9 +10,12 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.winapp.retailpos_sap.ui.model.BatchDetailModule;
+import com.winapp.retailpos_sap.ui.model.CreateInvoiceModel;
 import com.winapp.retailpos_sap.ui.model.CustomerDetails;
 import com.winapp.retailpos_sap.ui.model.CustomerModel;
 import com.winapp.retailpos_sap.ui.model.ProductsModel;
+import com.winapp.retailpos_sap.ui.model.SettingsModel;
 import com.winapp.retailpos_sap.ui.model.UserRoll;
 
 import java.util.ArrayList;
@@ -571,6 +574,22 @@ public class DBHelper extends SQLiteOpenHelper {
         }
     }
 
+    @SuppressLint("Range")
+    public ArrayList<SettingsModel> getSettings() {
+        ArrayList<SettingsModel> settings = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_SETTINGS, null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            SettingsModel model = new SettingsModel();
+            model.setSettingName(cursor.getString(cursor.getColumnIndex("settingname")));
+            model.setSettingValue(cursor.getString(cursor.getColumnIndex("settingvalue")));
+            settings.add(model);
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return settings;
+    }
 
     @SuppressLint("Range")
     public ArrayList<CustomerModel> getAllCustomers() {
@@ -721,23 +740,6 @@ public class DBHelper extends SQLiteOpenHelper {
         return true;
     }
 
-//    @SuppressLint("Range")
-//    public ArrayList<SettingsModel> getSettings() {
-//        ArrayList<SettingsModel> settings = new ArrayList<>();
-//        SQLiteDatabase db = this.getReadableDatabase();
-//        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_SETTINGS, null);
-//        cursor.moveToFirst();
-//        while (!cursor.isAfterLast()) {
-//            SettingsModel model = new SettingsModel();
-//            model.setSettingName(cursor.getString(cursor.getColumnIndex("settingname")));
-//            model.setSettingValue(cursor.getString(cursor.getColumnIndex("settingvalue")));
-//            settings.add(model);
-//            cursor.moveToNext();
-//        }
-//        Log.w("returnSettings:", ""+settings);
-//        cursor.close();
-//        return settings;
-//    }
 
     public void removeAllInvoices() {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -1365,8 +1367,7 @@ public class DBHelper extends SQLiteOpenHelper {
                                            String price, String stock, String total, String subTotal,
                                            String gstAmount, String netTotal, String itemDisc, String billDisc
             , String saleable, String damaged, String exchangeQty, String minimumSellPrice
-            , String productStock, String updateTime, String isItemFOC, String isItemBATCH ,
-                                           String oldSubTotal , String oldNettotal ,String iDiscAmt , String minimumSellPricePcs) {
+            , String productStock, String updateTime, String isItemFOC, String isItemBATCH) {
         Cursor cursor = null;
         String netqty = null;
         String focQty = null;
@@ -1406,10 +1407,6 @@ public class DBHelper extends SQLiteOpenHelper {
                 contentValues.put(UPDATE_TIME, updateTime);
                 contentValues.put(ISITEM_FOC, isItemFOC);
                 contentValues.put(ISITEM_BATCH, isItemBATCH);
-                contentValues.put(OLD_SUBTOTAL, oldSubTotal);
-                contentValues.put(OLD_NETTOTAL, oldNettotal);
-                contentValues.put(IDISC_AMT, iDiscAmt);
-                contentValues.put(MINIMUMSELL_PRICE_PCS, minimumSellPricePcs);
 
                 db.update(CREATE_INVOICE_TABLE, contentValues, "update_time = ?", new String[]{updateTime});
                 //db.update(CREATE_INVOICE_TABLE, contentValues, "product_code = ?", new String[]{productCode});
@@ -1443,10 +1440,6 @@ public class DBHelper extends SQLiteOpenHelper {
                 contentValues.put(UPDATE_TIME, updateTime);
                 contentValues.put(ISITEM_FOC, isItemFOC);
                 contentValues.put(ISITEM_BATCH, isItemBATCH);
-                contentValues.put(OLD_SUBTOTAL, oldSubTotal);
-                contentValues.put(OLD_NETTOTAL, oldNettotal);
-                contentValues.put(IDISC_AMT, iDiscAmt);
-                contentValues.put(MINIMUMSELL_PRICE_PCS, minimumSellPricePcs);
 
                 db.insert(CREATE_INVOICE_TABLE, null, contentValues);
                 Log.w("InsertProductValuesIn2:", contentValues.toString());
@@ -1486,7 +1479,113 @@ public class DBHelper extends SQLiteOpenHelper {
         }
         return true;
     }
+    public ArrayList<CreateInvoiceModel> getAllInvoiceProducts() {
+        ArrayList<CreateInvoiceModel> array_list = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        @SuppressLint("Recycle")
+        Cursor cursor = db.rawQuery("SELECT * FROM " + CREATE_INVOICE_TABLE, null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            CreateInvoiceModel data = new CreateInvoiceModel();
+            data.setProductCode(cursor.getString(cursor.getColumnIndex(PRODUCT_CODE)));
+            data.setProductName(cursor.getString(cursor.getColumnIndex(PRODUCT_NAME)));
+            data.setUomCode(cursor.getString(cursor.getColumnIndex(UOM_CODE)));
+            data.setActualQty(cursor.getString(cursor.getColumnIndex(ACTUAL_QTY)));
+            data.setFocQty(cursor.getString(cursor.getColumnIndex(FOC_QTY)));
+            data.setReturnQty(cursor.getString(cursor.getColumnIndex(RETURN_QTY)));
+            data.setNetQty(cursor.getString(cursor.getColumnIndex(NET_QTY)));
+            data.setPrice(cursor.getString(cursor.getColumnIndex(PRICE)));
+            data.setTotal(cursor.getString(cursor.getColumnIndex(TOTAL)));
+            data.setSubTotal(cursor.getString(cursor.getColumnIndex(SUB_TOTAL)));
+            data.setGstAmount(cursor.getString(cursor.getColumnIndex(GST_AMOUNT)));
+            data.setNetTotal(cursor.getString(cursor.getColumnIndex(NET_TOTAL)));
+            data.setStockQty(cursor.getString(cursor.getColumnIndex(STOCK_QTY)));
+            data.setUomText(cursor.getString(cursor.getColumnIndex(UOM_TEXT)));
+            data.setItemDisc(cursor.getString(cursor.getColumnIndex(ITEM_DISC)));
+            data.setBillDisc(cursor.getString(cursor.getColumnIndex(BILL_DISC)));
+            data.setSaleableQty(cursor.getString(cursor.getColumnIndex(SALEABLE)));
+            data.setDamagedQty(cursor.getString(cursor.getColumnIndex(DAMAGED)));
+            data.setExchangeQty(cursor.getString(cursor.getColumnIndex(EXCHANGE_QTY)));
+            data.setMinimumSellingPrice(cursor.getString(cursor.getColumnIndex(MINIMUMSELL_PRICE)));
+            data.setStockProductQty(cursor.getString(cursor.getColumnIndex(STOCK_QTYP)));
+            data.setUpdateTime(cursor.getString(cursor.getColumnIndex(UPDATE_TIME)));
+            data.setIsItemFOC(cursor.getString(cursor.getColumnIndex(ISITEM_FOC)));
+            data.setIsBatch(cursor.getString(cursor.getColumnIndex(ISITEM_BATCH)));
 
+            array_list.add(data);
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return array_list;
+    }
+    public void insertBatchList(ArrayList<BatchDetailModule> batchList, String productCode, String updatetime) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        try {
+            String q = "SELECT * FROM " + BATCH_TABLE + " WHERE updatetime='" + updatetime + "'";
+            Cursor cursor = db.rawQuery(q, null);
+
+
+            Log.w("count1:", "" + cursor.getCount());
+            if (cursor.getCount() > 0) {
+
+                db.delete(BATCH_TABLE, "updatetime = ?", new String[]{updatetime});
+//                if (cursor.moveToFirst()) {
+//                    do {
+////                        netqty = cursor.getString(cursor.getColumnIndex("net_qty"));
+////                        focQty = cursor.getString(cursor.getColumnIndex("foc_qty"));
+//                    } while (cursor.moveToNext());
+//                }
+                // if (Double.parseDouble(netqty) > 0 || Double.parseDouble(focQty) > 0) {
+                if (batchList.size() > 0) {
+                    //try {
+                    for (BatchDetailModule batchDetailModule : batchList) {
+                        ContentValues cv = new ContentValues();
+                        cv.put("batchno", batchDetailModule.getBatchNo());
+                        cv.put("batchqty", batchDetailModule.getBatchQty());
+                        cv.put("productcode", productCode);
+                        cv.put("updatetime", updatetime);
+                        cv.put("availableqty", batchDetailModule.getAvlQty());
+
+
+                        db.insert(BATCH_TABLE, null, cv);
+//                        db.update(BATCH_TABLE, cv, "updatetime = ?", new String[]{updatetime});
+                        // Toast.makeText(context, "Product Updated Successfully", Toast.LENGTH_LONG).show();
+                        Log.w("updatebatchSuccess:", "Success");
+//                        }
+//                        db.close();
+//                    } catch (Exception e) {
+//                        Log.e("Problem", e + " ");
+//                    }
+                    }
+                }
+            } else {
+
+                if (batchList.size() > 0) {
+                    // try {
+                    for (BatchDetailModule batchDetailModule : batchList) {
+                        ContentValues cv = new ContentValues();
+                        cv.put("batchno", batchDetailModule.getBatchNo());
+                        cv.put("batchqty", batchDetailModule.getBatchQty());
+                        cv.put("productcode", productCode);
+                        cv.put("updatetime", updatetime);
+                        cv.put("availableqty", batchDetailModule.getAvlQty());
+
+                        db.insert(BATCH_TABLE, null, cv);
+                        //Toast.makeText(context, "Product Added Successfully", Toast.LENGTH_LONG).show();
+                        Log.w("InsertbatchSuccess:", "Success");
+//                        }
+//                        db.close();
+//                    } catch (Exception e) {
+//                        Log.e("Problem", e + " ");
+//                    }
+                    }
+                }
+            }
+        } catch (Exception ex) {
+        }
+
+    }
 
     public int getRandomProductId() {
         Random r = new Random();
@@ -1685,7 +1784,34 @@ public class DBHelper extends SQLiteOpenHelper {
         return true;
     }
 
+    public ArrayList<BatchDetailModule> getBatchProducts(String productId, String updatetime) {
+        ArrayList<BatchDetailModule> batchDetailList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + BATCH_TABLE + " where productcode = ? AND updatetime = ?", new String[]{productId, updatetime});
+        Log.w("GetBatchQuery::", "SELECT * FROM " + BATCH_TABLE + " WHERE productcode= ? AND updatetime = ?'" + productId + ", " + updatetime + "'");
 
+//        Cursor cursor = db.rawQuery("SELECT * FROM " + BATCH_TABLE + " where productcode = ?", new String[]{productId});
+//        Log.w("GetBatchQuery::", "SELECT * FROM " + BATCH_TABLE + " WHERE productcode='" + productId + "'");
+
+        if (cursor.getCount() != 0) {
+
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                @SuppressLint("Range")
+                BatchDetailModule model = new BatchDetailModule(
+                        cursor.getString(cursor.getColumnIndex("batchno")),
+                        cursor.getString(cursor.getColumnIndex("batchqty")),
+                        cursor.getString(cursor.getColumnIndex("productcode")),
+                        cursor.getString(cursor.getColumnIndex("updatetime")),
+                        cursor.getString(cursor.getColumnIndex("availableqty"))
+                );
+                batchDetailList.add(model);
+                cursor.moveToNext();
+            }
+        }
+        cursor.close();
+        return batchDetailList;
+    }
     public boolean updateCart(String id, String qty, String ctnQty, String sub_total, String tax, String net_total) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();

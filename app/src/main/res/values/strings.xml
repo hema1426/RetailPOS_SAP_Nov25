@@ -17,6 +17,7 @@
     <string name="save_and_print">Save and Print</string>
     <string name="no_of_copies">No of Copies ?</string>
     <string name="email_invoice">Email Invoice</string>
+    <string name="gst">GST</string>
 
     <string name="stock_hand">Stock in Hand : </string>
     <string name="qty_txt">Qty : </string>

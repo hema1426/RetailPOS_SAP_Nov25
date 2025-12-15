@@ -80,7 +80,7 @@ public class TransferListProductActivity extends NavigationActivity implements V
     ArrayList<TransferDetailModel.TransferDetails> transferDetailsList;
     public String transferType = "Transfer In";
     public Button addTransfer;
-    public TextView emptyText;
+    public TextView emptyText ,transferSize;
     private String currentDate = "";
     private TextView fromDate;
     private TextView toDate;
@@ -114,6 +114,7 @@ public class TransferListProductActivity extends NavigationActivity implements V
         toDate = findViewById(R.id.to_date_Trans);
         btn_cancel = findViewById(R.id.btn_cancel_Trans);
         emptyText = findViewById(R.id.empty_text);
+        transferSize = findViewById(R.id.transfer_size);
         searchFilterView = findViewById(R.id.search_filter_transfer);
 
         transferOutText.setOnClickListener(this);
@@ -250,6 +251,7 @@ public class TransferListProductActivity extends NavigationActivity implements V
 
     public void setTransferListAdapter(ArrayList<TransferModel> transferList) {
         try {
+            transferSize.setText("(" + transferList.size() + ")" + " Products") ;
             transferAdapter = new TransferAdapter(this, transferList, new TransferAdapter.CallBack() {
                 @Override
                 public void callDescription(String transferNo, String mode) {
@@ -345,13 +347,16 @@ public class TransferListProductActivity extends NavigationActivity implements V
                                 transferListView.setVisibility(View.VISIBLE);
                                 emptyText.setVisibility(View.GONE);
                                 setTransferListAdapter(transferList);
+                                searchFilterView.setVisibility(View.GONE);
                             } else {
                                 transferListView.setVisibility(View.GONE);
                                 emptyText.setVisibility(View.VISIBLE);
+                                transferSize.setText("(0) Products") ;
                             }
                         } else {
                             transferListView.setVisibility(View.GONE);
                             emptyText.setVisibility(View.VISIBLE);
+                            transferSize.setText("(0) Products") ;
                             Toast.makeText(getApplicationContext(), statusMessage, Toast.LENGTH_LONG).show();
                         }
 

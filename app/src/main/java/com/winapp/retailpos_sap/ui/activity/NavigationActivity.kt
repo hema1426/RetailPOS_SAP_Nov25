@@ -19,6 +19,7 @@ import com.winapp.retailpos_sap.ui.utils.SessionManager
 import com.winapp.retailpos_sap.ui.utils.SharedPreferenceUtil
 import com.google.android.material.navigation.NavigationView
 import com.winapp.retailpos_sap.R
+import com.winapp.retailpos_sap.ui.db.DBHelper
 
 open class NavigationActivity : AppCompatActivity() {
     var drawerLayout: DrawerLayout? = null
@@ -91,7 +92,7 @@ open class NavigationActivity : AppCompatActivity() {
       //  val userRolls = helper!!.userPermissions
         val menu = mNavigationView!!.getMenu()
       //  val home = menu.findItem(R.id.navigation_item_home)
-        val delPicklist = menu.findItem(R.id.navigation_item_delPick)
+        val delPicklist = menu.findItem(R.id.navigation_item_delivery)
         val trackingInv = menu.findItem(R.id.navigation_item_trackingInv)
 //        val allcatagories = menu.findItem(R.id.navigation_item_catagories)
 //        val customers = menu.findItem(R.id.navigation_item_customer)
@@ -115,9 +116,9 @@ open class NavigationActivity : AppCompatActivity() {
 //                return@OnNavigationItemSelectedListener true
 //            }
 //            else
-                if (itemId == R.id.navigation_item_delPick) {
+                if (itemId == R.id.navigation_item_delivery) {
                 val intent: Intent // setFragment(new SchedulingFragment());
-                intent = Intent(this@NavigationActivity, NewDeliveryPickListActivity::class.java)
+                intent = Intent(this@NavigationActivity, DeliveryListActivity::class.java)
                 startActivity(intent)
                 drawerLayout!!.closeDrawers()
                 // mCurrentSelectedPosition = 1;
@@ -247,7 +248,7 @@ open class NavigationActivity : AppCompatActivity() {
     }
 
     companion object {
-     //   @JvmField
-     //   var helper: DBHelper? = null
+        @JvmField
+        var helper: DBHelper? = null
     }
 }

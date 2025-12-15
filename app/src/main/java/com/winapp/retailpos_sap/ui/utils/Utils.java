@@ -26,6 +26,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
+
+import com.winapp.retailpos_sap.ui.model.NewLocationModel;
+import com.winapp.retailpos_sap.ui.model.ProductsModel;
+
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.Format;
@@ -59,6 +63,8 @@ public class Utils {
 
     public static String orderDate="";
     public static String orderNo="";
+    public static ArrayList<NewLocationModel.LocationDetails> locationDetails;
+
 
     public static String getOrderDate() {
         return orderDate;
@@ -217,7 +223,13 @@ public class Utils {
         int value = (int) data;
         return String.valueOf(value);
     }
+    public static ArrayList<NewLocationModel.LocationDetails> getLocationList() {
+        return locationDetails;
+    }
 
+    public static void setLocationList(ArrayList<NewLocationModel.LocationDetails> locationList) {
+        Utils.locationDetails = locationList;
+    }
     public static void showLoader(Context context, String title) {
         try {
             pDialog = new SweetAlertDialog(context, SweetAlertDialog.PROGRESS_TYPE);
@@ -230,6 +242,24 @@ public class Utils {
         }
 
     }
+
+    //no duplicate prod
+    public static ArrayList<ProductsModel> getProductList(ArrayList<ProductsModel> products) {
+        ArrayList<ProductsModel> noRepeat = new ArrayList<>();
+        for (ProductsModel event : products) {
+            boolean isFound = false;
+            // check if the event name exists in noRepeat
+            for (ProductsModel e : noRepeat) {
+                if (e.getProductCode().trim().equals(event.getProductCode().trim()) || (e.equals(event))) {
+                    isFound = true;
+                    break;
+                }
+            }
+            if (!isFound) noRepeat.add(event);
+        }
+        return noRepeat;
+    }
+
     public static void hideLoader() {
         if (pDialog != null && pDialog.isShowing()) {
             pDialog.dismiss();

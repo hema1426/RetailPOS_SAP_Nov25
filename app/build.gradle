@@ -78,4 +78,8 @@ dependencies {
 
 // Volley Library
     implementation('com.android.volley:volley:1.2.1')
+//    // Barcode Reading Library
+//    implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
+//    implementation 'me.dm7.barcodescanner:core:1.9'
+//    implementation 'com.android.support:multidex:1.0.3'
 }

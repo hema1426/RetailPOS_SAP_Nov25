@@ -81,13 +81,13 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/title"
+            android:id="@+id/title_trans"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="12sp"
             android:singleLine="true"
-            android:text="LOADING SHEET"
+            android:text=""
             android:textColor="@color/colorPrimary"
             android:textSize="12sp"
             android:textStyle="bold" />
