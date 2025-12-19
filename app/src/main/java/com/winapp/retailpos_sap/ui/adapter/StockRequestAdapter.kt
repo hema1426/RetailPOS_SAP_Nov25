@@ -1,4 +1,4 @@
-package com.winapp.retailpos_sap.ui.newtransfer
+package com.winapp.retailpos_sap.ui.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -19,21 +19,19 @@ import com.winapp.retailpos_sap.CommonMethods
 import com.winapp.retailpos_sap.R
 import com.winapp.retailpos_sap.ui.newtransfer.TransferInModel.TransferInDetails
 
-class TransferInAdapter(
+class StockRequestAdapter(
     private val context: Context,
     var transferInlist: ArrayList<TransferInDetails>,
     var transferMode: String
-) : RecyclerView.Adapter<TransferInAdapter.MyViewHolder>() {
+) : RecyclerView.Adapter<StockRequestAdapter.MyViewHolder>() {
     lateinit var selectedModel: TransferInDetails
     var istrue: Boolean = false
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
         return MyViewHolder(
             LayoutInflater.from(
                 context
-            ).inflate(R.layout.transfer_in_item, parent, false)
+            ).inflate(R.layout.stock_req_add_item, parent, false)
         )
-
-
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
@@ -116,19 +114,8 @@ class TransferInAdapter(
                         Log.w("editabl_s", "" + s.toString())
                         Log.w("stockinHand11", "" + transferInlist[pos].stockInHand)
                         if (!s.toString().isEmpty()) {
-                            if (transferMode == "Stock Request") {
                                 transferInlist[pos].qty = s.toString()
                                 //  notifyDataSetChanged();
-                            } else {
-                                if (transferInlist[pos].stockInHand >= s.toString().toInt()) {
-                                    transferInlist[pos].qty = s.toString()
-//                                    notifyItemChanged(pos)
-                                } else {
-                                    qtytxt.setText("")
-                                    Toast.makeText(context, "Low stock !", Toast.LENGTH_SHORT)
-                                        .show()
-                                }
-                            }
                         } else {
                             transferInlist[pos].qty = ""
                         }

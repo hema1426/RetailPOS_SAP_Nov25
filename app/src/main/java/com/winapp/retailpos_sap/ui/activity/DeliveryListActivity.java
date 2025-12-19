@@ -35,11 +35,10 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.winapp.retailpos_sap.R;
 import com.winapp.retailpos_sap.ui.adapter.DeliveryListAdapter;
-import com.winapp.retailpos_sap.ui.adapter.TransferAdapter;
 import com.winapp.retailpos_sap.ui.db.DBHelper;
 import com.winapp.retailpos_sap.ui.model.TransferDetailModel;
 import com.winapp.retailpos_sap.ui.model.TransferModel;
-import com.winapp.retailpos_sap.ui.newtransfer.TransferInActivity;
+import com.winapp.retailpos_sap.ui.newtransfer.TransferInAddActivity;
 import com.winapp.retailpos_sap.ui.utils.Constants;
 import com.winapp.retailpos_sap.ui.utils.SessionManager;
 import com.winapp.retailpos_sap.ui.utils.Utils;
@@ -603,7 +602,7 @@ public class DeliveryListActivity extends NavigationActivity implements View.OnC
             //intent.putExtra("transferType",transferType);
             // startActivity(intent);
 
-            Intent intent = new Intent(getApplicationContext(), TransferInActivity.class);
+            Intent intent = new Intent(getApplicationContext(), TransferInAddActivity.class);
             intent.putExtra("transferType", transferType);
             startActivity(intent);
         } else if (item.getItemId() == R.id.action_filter) {

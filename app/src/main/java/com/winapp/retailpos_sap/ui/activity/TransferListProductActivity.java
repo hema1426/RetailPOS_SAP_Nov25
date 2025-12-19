@@ -34,11 +34,11 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.winapp.retailpos_sap.R;
-import com.winapp.retailpos_sap.ui.adapter.TransferAdapter;
+import com.winapp.retailpos_sap.ui.adapter.TransferListAdapter;
 import com.winapp.retailpos_sap.ui.db.DBHelper;
 import com.winapp.retailpos_sap.ui.model.TransferDetailModel;
 import com.winapp.retailpos_sap.ui.model.TransferModel;
-import com.winapp.retailpos_sap.ui.newtransfer.TransferInActivity;
+import com.winapp.retailpos_sap.ui.newtransfer.TransferInAddActivity;
 import com.winapp.retailpos_sap.ui.utils.Constants;
 import com.winapp.retailpos_sap.ui.utils.SessionManager;
 import com.winapp.retailpos_sap.ui.utils.Utils;
@@ -63,7 +63,7 @@ public class TransferListProductActivity extends NavigationActivity implements V
     public RecyclerView transferListView;
     private LinearLayout transferInButton;
     private LinearLayout transferOutButton;
-    public TransferAdapter transferAdapter;
+    public TransferListAdapter transferAdapter;
     public ArrayList<TransferModel> transferList;
     public DBHelper dbHelper;
     private SweetAlertDialog pDialog;
@@ -87,6 +87,7 @@ public class TransferListProductActivity extends NavigationActivity implements V
     private Button searchButton, btn_cancel;
     private int mYear, mMonth, mDay, mHour, mMinute;
     private String transferMode = "Transfer In";
+    private String mode = "In";
     HashMap<String, String> user;
     SessionManager session;
     View searchFilterView;
@@ -214,7 +215,7 @@ public class TransferListProductActivity extends NavigationActivity implements V
                 if (!fromDate.getText().toString().isEmpty() && !toDate.getText().toString().isEmpty()) {
                     String fromdate = Utils.convertDate(fromDate.getText().toString(), "dd-MM-yyyy", "yyyyMMdd");
                     String todate = Utils.convertDate(toDate.getText().toString(), "dd-MM-yyyy", "yyyyMMdd");
-                    getTransferInRequest(transferMode, fromdate, todate);
+                    getTransferInRequest(mode, fromdate, todate);
                 } else {
                     Toast.makeText(getApplicationContext(), "Select the Date to Search..!", Toast.LENGTH_SHORT).show();
                 }
@@ -252,7 +253,7 @@ public class TransferListProductActivity extends NavigationActivity implements V
     public void setTransferListAdapter(ArrayList<TransferModel> transferList) {
         try {
             transferSize.setText("(" + transferList.size() + ")" + " Products") ;
-            transferAdapter = new TransferAdapter(this, transferList, new TransferAdapter.CallBack() {
+            transferAdapter = new TransferListAdapter(this, transferList, new TransferListAdapter.CallBack() {
                 @Override
                 public void callDescription(String transferNo, String mode) {
                     Log.w("GivenTransferNo::", transferNo.toString());
@@ -528,6 +529,7 @@ public class TransferListProductActivity extends NavigationActivity implements V
             String todate = Utils.convertDate(toDate.getText().toString(), "dd-MM-yyyy", "yyyyMMdd");
             getTransferInRequest("In", fromdate, todate);
             transferMode = "Transfer In";
+            mode = "In";
             // addTransfer.setVisibility(View.GONE);
             transferInButton.setEnabled(false);
             transferOutButton.setEnabled(true);
@@ -542,6 +544,7 @@ public class TransferListProductActivity extends NavigationActivity implements V
             String todate = Utils.convertDate(toDate.getText().toString(), "dd-MM-yyyy", "yyyyMMdd");
             getTransferInRequest("Out", fromdate, todate);
             transferMode = "Transfer Out";
+            mode = "Out";
             //addTransfer.setVisibility(View.VISIBLE);
             transferInButton.setEnabled(true);
             transferOutButton.setEnabled(false);
@@ -556,6 +559,7 @@ public class TransferListProductActivity extends NavigationActivity implements V
             String todate = Utils.convertDate(toDate.getText().toString(), "dd-MM-yyyy", "yyyyMMdd");
             getTransferInRequest("In", fromdate, todate);
             transferMode = "Transfer In";
+            mode = "In";
             // addTransfer.setVisibility(View.GONE);
             transferInButton.setEnabled(false);
             transferOutButton.setEnabled(true);
@@ -570,6 +574,7 @@ public class TransferListProductActivity extends NavigationActivity implements V
             String todate = Utils.convertDate(toDate.getText().toString(), "dd-MM-yyyy", "yyyyMMdd");
             getTransferInRequest("Out", fromdate, todate);
             transferMode = "Transfer Out";
+            mode = "Out";
             // addTransfer.setVisibility(View.VISIBLE);
             transferInButton.setEnabled(true);
             transferOutButton.setEnabled(false);
@@ -594,7 +599,7 @@ public class TransferListProductActivity extends NavigationActivity implements V
             //intent.putExtra("transferType",transferType);
             // startActivity(intent);
 
-            Intent intent = new Intent(getApplicationContext(), TransferInActivity.class);
+            Intent intent = new Intent(getApplicationContext(), TransferInAddActivity.class);
             intent.putExtra("transferType", transferType);
             startActivity(intent);
         } else if (item.getItemId() == R.id.action_filter) {

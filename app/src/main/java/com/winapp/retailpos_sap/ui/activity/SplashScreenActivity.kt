@@ -132,8 +132,7 @@ class SplashScreenActivity : AppCompatActivity() {
 //        val requestQueue = Volley.newRequestQueue(this)
 //        val url = "http://3.85.9.22/Licence/api/LicenceApi/CheckDevice"
 //        Log.w("url_checkdevic:", url)
-//
-//
+
 //        val jsonObjectRequest: StringRequest =
 //            object : StringRequest(Method.POST, url, Response.Listener { response: String ->
 //

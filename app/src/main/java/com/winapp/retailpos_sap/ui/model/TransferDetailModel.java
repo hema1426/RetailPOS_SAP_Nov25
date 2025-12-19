@@ -83,7 +83,25 @@ public class TransferDetailModel {
         private String description;
         private String itemCode;
         private String qty;
+        private String sentQty;
         private String uomCode;
+        private int stock;
+
+        public String getSentQty() {
+            return sentQty;
+        }
+
+        public void setSentQty(String sentQty) {
+            this.sentQty = sentQty;
+        }
+
+        public int getStock() {
+            return stock;
+        }
+
+        public void setStock(int stock) {
+            this.stock = stock;
+        }
 
         public String getItemCode() {
             return itemCode;

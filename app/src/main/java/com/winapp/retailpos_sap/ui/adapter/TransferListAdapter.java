@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
-public class TransferAdapter extends RecyclerView.Adapter<TransferAdapter.TransferViewHolder> implements Filterable {
+public class TransferListAdapter extends RecyclerView.Adapter<TransferListAdapter.TransferViewHolder> implements Filterable {
     /**
      * Declare the Context and Arraylist variables
      */
@@ -89,7 +89,7 @@ public class TransferAdapter extends RecyclerView.Adapter<TransferAdapter.Transf
      * @param mContext
      * @param transferList
      */
-    public TransferAdapter(Context mContext, ArrayList<TransferModel> transferList, CallBack callBack) {
+    public TransferListAdapter(Context mContext, ArrayList<TransferModel> transferList, CallBack callBack) {
         this.mContext = mContext;
         this.transferList = transferList;
         this.callBack = callBack;

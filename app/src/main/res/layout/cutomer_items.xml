@@ -50,7 +50,7 @@
                 android:layout_height="22dp"
                 android:layout_marginRight="0dp"
                 android:text="00024"
-                android:textColor="#006DDB"
+                android:textColor="#6a358e"
                 android:textSize="12sp" />
 
             <ImageView
@@ -131,7 +131,7 @@
                 android:maxLines="2"
                 android:maxWidth="250dp"
                 android:textStyle="bold"
-                android:textColor="#006DDB"
+                android:textColor="#6a358e"
                 android:ellipsize="end"
                 android:id="@+id/outstanding_amount"
                 android:textSize="12sp"

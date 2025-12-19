@@ -1,5 +1,7 @@
 package com.winapp.retailpos_sap.ui.model;
 
+import java.util.ArrayList;
+
 public class TransferModel {
 
     public String transferNo;
@@ -8,6 +10,25 @@ public class TransferModel {
     public String fromLocation;
     public String toLocation;
     public String status;
+    private boolean isShow=false;
+
+    public boolean isShow() {
+        return isShow;
+    }
+
+    public void setShow(boolean show) {
+        isShow = show;
+    }
+
+    public ArrayList<TransferDetailModel.TransferDetails> transferDetailsList;
+
+    public ArrayList<TransferDetailModel.TransferDetails> getTransferDetailsList() {
+        return transferDetailsList;
+    }
+
+    public void setTransferDetailsList(ArrayList<TransferDetailModel.TransferDetails> transferDetailsList) {
+        this.transferDetailsList = transferDetailsList;
+    }
 
     public String getToLocation() {
         return toLocation;

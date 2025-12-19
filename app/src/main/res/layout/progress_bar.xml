@@ -24,7 +24,7 @@
         android:visibility="gone"
         android:indeterminate="true"
         android:id="@+id/progressBar"
-        android:indeterminateTint="#006DDB"
+        android:indeterminateTint="#6a358e"
         android:indeterminateTintMode="src_in" />
 
     <!-- Define the Loding content textview -->

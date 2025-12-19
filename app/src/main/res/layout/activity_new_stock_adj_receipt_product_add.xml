@@ -561,7 +561,7 @@
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:text="Carton Price"
-                                        android:textColor="#006DDB"
+                                        android:textColor="#6a358e"
                                         android:textSize="12sp"
                                         android:textStyle="bold" />
 
@@ -622,7 +622,7 @@
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:text="Unit Price"
-                                        android:textColor="#006DDB"
+                                        android:textColor="#6a358e"
                                         android:textSize="12sp"
                                         android:textStyle="bold" />
 
@@ -671,7 +671,7 @@
                                     android:padding="20sp"
                                     android:tag="hide"
                                     android:src="@drawable/ic_baseline_keyboard_arrow_up_24"
-                                    android:textColor="#006DDB"
+                                    android:textColor="#6a358e"
                                     android:textSize="16sp"
                                     android:textStyle="bold" />
 
@@ -1132,7 +1132,7 @@
                             android:layout_width="wrap_content"
                             android:layout_marginLeft="10dp"
                             android:id="@+id/item_count"
-                            android:textColor="#006DDB"
+                            android:textColor="#6a358e"
                             android:visibility="gone"
                             android:textStyle="bold"
                             android:textSize="10sp"
@@ -1319,7 +1319,7 @@
                         android:gravity="center"
                         android:textSize="13sp"
                         android:layout_weight="1"
-                        android:textColor="#006DDB"
+                        android:textColor="#6a358e"
                         android:layout_height="wrap_content"/>
 
                     <TextView
@@ -1331,7 +1331,7 @@
                         android:gravity="center"
                         android:layout_weight="1"
                         android:textSize="13sp"
-                        android:textColor="#006DDB"
+                        android:textColor="#6a358e"
                         android:layout_height="wrap_content"/>
 
                     <TextView
@@ -1342,7 +1342,7 @@
                         android:gravity="center"
                         android:textSize="13sp"
                         android:layout_weight="1"
-                        android:textColor="#006DDB"
+                        android:textColor="#6a358e"
                         android:layout_height="wrap_content"/>
 
                 </LinearLayout>
@@ -1350,7 +1350,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:padding="5dp"
-                    android:background="#006DDB"
+                    android:background="#6a358e"
                     android:layout_gravity="center"
                     android:orientation="horizontal"
                     android:layout_height="wrap_content">

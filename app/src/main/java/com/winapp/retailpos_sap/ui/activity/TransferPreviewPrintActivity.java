@@ -229,6 +229,7 @@ public class TransferPreviewPrintActivity extends AppCompatActivity {
                                 JSONObject objectItem= itemsArray.optJSONObject(i);
                                 TransferDetailModel.TransferDetails transferModel =new TransferDetailModel.TransferDetails();
                                 transferModel.setDescription(objectItem.optString("itemName"));
+                                transferModel.setItemCode(objectItem.optString("itemCode"));
                                 transferModel.setQty(objectItem.optString("qty"));
                                 transferModel.setUomCode(objectItem.optString("uomCode"));
                                 transferDetailsList.add(transferModel);

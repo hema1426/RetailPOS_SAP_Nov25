@@ -96,7 +96,7 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_gravity="bottom|center"
-                        android:background="#006DDB"
+                        android:background="#6a358e"
                         android:gravity="end"
                         android:visibility="gone"
                         android:id="@+id/outstanding_layout"

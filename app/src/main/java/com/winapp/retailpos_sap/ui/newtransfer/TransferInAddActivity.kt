@@ -30,7 +30,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatSpinner
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -64,7 +63,7 @@ import java.util.Calendar
 import java.util.Locale
 import java.util.Objects
 
-class TransferInActivity : BaseActivity() {
+class TransferInAddActivity : BaseActivity() {
     var pDialog: SweetAlertDialog? = null
     private var transferInModels: ArrayList<TransferInModel>? = null
     private var transferInDetailsl: ArrayList<TransferInDetails>? = null
@@ -236,7 +235,7 @@ class TransferInActivity : BaseActivity() {
             if (!fromWarehouseCode!!.isEmpty() && fromWarehouseCode != null) {
                 gettolocationDialog(locationDetailsl)
             } else {
-                Toast.makeText(this@TransferInActivity, "Select from location", Toast.LENGTH_SHORT)
+                Toast.makeText(this@TransferInAddActivity, "Select from location", Toast.LENGTH_SHORT)
                     .show()
             }
         })
@@ -296,7 +295,7 @@ class TransferInActivity : BaseActivity() {
     }
 
     fun showDeleteAlert() {
-        val builder1 = AlertDialog.Builder(this@TransferInActivity)
+        val builder1 = AlertDialog.Builder(this@TransferInAddActivity)
         builder1.setMessage("Data Will be Cleared are you sure want to back?")
         builder1.setCancelable(false)
         builder1.setPositiveButton(
@@ -423,7 +422,7 @@ class TransferInActivity : BaseActivity() {
         val mContent = customLayout.findViewById<LinearLayout>(R.id.signature_layout)
         acceptButton.setEnabled(false)
         acceptButton.setAlpha(0.4f)
-        val mSig = CaptureSignatureView(this@TransferInActivity, null) {
+        val mSig = CaptureSignatureView(this@TransferInAddActivity, null) {
             acceptButton.setEnabled(true)
             acceptButton.setAlpha(1f)
         }
@@ -510,7 +509,7 @@ class TransferInActivity : BaseActivity() {
 
     fun saveTransferOrRequest(jsonBody: JSONObject, copy: Int, transferType: String?) {
         try {
-            pDialog = SweetAlertDialog(this@TransferInActivity, SweetAlertDialog.PROGRESS_TYPE)
+            pDialog = SweetAlertDialog(this@TransferInAddActivity, SweetAlertDialog.PROGRESS_TYPE)
             pDialog!!.progressHelper.setBarColor(Color.parseColor("#A5DC86"))
             pDialog!!.setCancelable(false)
             val requestQueue = Volley.newRequestQueue(this)
@@ -952,7 +951,7 @@ class TransferInActivity : BaseActivity() {
                     dialog.dismiss()
                 } else {
                     Toast.makeText(
-                        this@TransferInActivity,
+                        this@TransferInAddActivity,
                         "From location & to location should not be same",
                         Toast.LENGTH_SHORT
                     ).show()
@@ -1146,7 +1145,7 @@ private val fragmentLauncher: ActivityResultLauncher<ScanOptions> = registerForA
     ScanContract()
 ) { result ->
     if (result.contents == null) {
-        Toast.makeText(this@TransferInActivity, "No Product Found1", Toast.LENGTH_LONG)
+        Toast.makeText(this@TransferInAddActivity, "No Product Found1", Toast.LENGTH_LONG)
             .show()
     } else {
         val barcodeTxt = result.contents
@@ -1157,7 +1156,7 @@ private val fragmentLauncher: ActivityResultLauncher<ScanOptions> = registerForA
         scanBarTxt(barcodeTxt)
 
         Toast.makeText(
-            this@TransferInActivity,
+            this@TransferInAddActivity,
             "Product" + "${result.contents}",
             Toast.LENGTH_LONG
         ).show()
@@ -1207,11 +1206,12 @@ override fun onOptionsItemSelected(item: MenuItem): Boolean {
         }
     } else if (item.itemId == R.id.action_save1) {
         for (i in transferInDetailsl!!.indices) {
-            if (!transferInDetailsl!![i].qty.isEmpty()) {
+            if (transferInDetailsl!![i].qty.isNotEmpty()) {
                 count += transferInDetailsl!![i].qty.toInt()
             }
         }
-        Log.e("qqty", "" + count)
+        Log.w("transiz_qty", "" + count)
+        Log.w("transsiz", "" + transferInDetailsl!!.size)
         if (fromWarehouseCode != null && toWarehouseCode != null && !toWarehouseCode!!.isEmpty() &&
             !fromWarehouseCode!!.isEmpty()
         ) {

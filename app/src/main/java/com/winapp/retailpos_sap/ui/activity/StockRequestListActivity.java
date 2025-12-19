@@ -23,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -34,11 +35,11 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.winapp.retailpos_sap.R;
-import com.winapp.retailpos_sap.ui.adapter.TransferAdapter;
+import com.winapp.retailpos_sap.ui.adapter.StockRequestListAdapter;
+import com.winapp.retailpos_sap.ui.adapter.TransferListAdapter;
 import com.winapp.retailpos_sap.ui.db.DBHelper;
 import com.winapp.retailpos_sap.ui.model.TransferDetailModel;
 import com.winapp.retailpos_sap.ui.model.TransferModel;
-import com.winapp.retailpos_sap.ui.newtransfer.TransferInActivity;
 import com.winapp.retailpos_sap.ui.utils.Constants;
 import com.winapp.retailpos_sap.ui.utils.SessionManager;
 import com.winapp.retailpos_sap.ui.utils.Utils;
@@ -47,7 +48,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -59,12 +59,13 @@ import java.util.Objects;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 
-public class StockRequestListActivity extends NavigationActivity implements View.OnClickListener {
+public class StockRequestListActivity extends NavigationActivity implements
+        View.OnClickListener,StockRequestListAdapter.ConvertClickListener  {
 
     public RecyclerView stockRequestList;
     private LinearLayout transferInButton;
     private LinearLayout transferOutButton;
-    public TransferAdapter requestAdapter;
+    public StockRequestListAdapter requestAdapter;
     public ArrayList<TransferModel> requestList;
     public DBHelper dbHelper;
     private SweetAlertDialog pDialog;
@@ -96,6 +97,8 @@ public class StockRequestListActivity extends NavigationActivity implements View
     HashMap<String ,String> user;
     SessionManager session;
     View searchFilterView;
+    private String requestMode = "Receive" ;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -200,6 +203,7 @@ public class StockRequestListActivity extends NavigationActivity implements View
                 String todate= Utils.convertDate(toDate.getText().toString(),"dd-MM-yyyy","yyyyMMdd");
                 getStockRequestList("Out",fromdate,todate);
                 mode="Out";
+                requestMode = "Sent";
             }
         });
 
@@ -213,6 +217,7 @@ public class StockRequestListActivity extends NavigationActivity implements View
                 String todate=Utils.convertDate(toDate.getText().toString(),"dd-MM-yyyy","yyyyMMdd");
                 getStockRequestList("In",fromdate,todate);
                 mode="In";
+                requestMode = "Receive";
             }
         });
 
@@ -397,7 +402,7 @@ public class StockRequestListActivity extends NavigationActivity implements View
         //try {
             transferSize.setText("(" + stockRequestList.size() + ")" + " Products") ;
 
-            requestAdapter = new TransferAdapter(this, stockRequestList, new TransferAdapter.CallBack() {
+            requestAdapter = new StockRequestListAdapter(this, stockRequestList, this, new StockRequestListAdapter.CallBack() {
                 @Override
                 public void callDescription(String requestNo,String mode) {
                     Log.w("GivenTransferNo::", requestNo.toString());
@@ -613,9 +618,8 @@ public class StockRequestListActivity extends NavigationActivity implements View
             // Intent intent=new Intent(getApplicationContext(),TransferActivity.class);
             //intent.putExtra("transferType",transferType);
             // startActivity(intent);
-
-            Intent intent=new Intent(getApplicationContext(), TransferInActivity.class);
-            intent.putExtra("transferType","Stock Request");
+            Intent intent=new Intent(getApplicationContext(), StockRequestAddActivity.class);
+            intent.putExtra("requestType",requestMode);
             startActivity(intent);
         }else if (item.getItemId()==R.id.action_filter) {
             if (searchFilterView.getVisibility() == View.VISIBLE) {
@@ -636,5 +640,29 @@ public class StockRequestListActivity extends NavigationActivity implements View
     public void onBackPressed() {
         super.onBackPressed();
         finish();
+    }
+
+    public void showPopupMenu(TransferModel transferModels ,View view) {
+        PopupMenu popupMenu = new PopupMenu(this, view);
+        popupMenu.inflate(R.menu.transfer_menu);
+
+        popupMenu.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.convert_transfer_menu) {
+
+             Intent intent=new Intent(StockRequestListActivity.this, ConvertTransferAddActivity.class);
+             intent.putExtra("convertTranferNo",transferModels.transferNo);
+
+             startActivity(intent);
+                return true;
+            }
+            return false;
+        });
+
+        popupMenu.show();
+    }
+
+    @Override
+    public void convertSelected(TransferModel transferModels, View view) {
+        showPopupMenu(transferModels,view);
     }
 }

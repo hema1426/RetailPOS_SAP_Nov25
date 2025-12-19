@@ -85,6 +85,18 @@
             android:screenOrientation="portrait"
             />
         <activity
+            android:name=".ui.activity.ConvertTransferAddActivity"
+            android:exported="false"
+            android:theme="@style/AppTheme"
+            android:screenOrientation="portrait"
+            />
+        <activity
+            android:name=".ui.activity.StockRequestAddActivity"
+            android:exported="false"
+            android:theme="@style/AppTheme"
+            android:screenOrientation="portrait"
+            />
+        <activity
             android:name=".ui.activity.DeliveryListActivity"
             android:exported="false"
             android:screenOrientation="portrait"
@@ -96,7 +108,7 @@
             android:screenOrientation="portrait"
             />
         <activity
-            android:name=".ui.newtransfer.TransferInActivity"
+            android:name=".ui.newtransfer.TransferInAddActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
