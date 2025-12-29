@@ -282,7 +282,7 @@
     </LinearLayout>
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/transferProductList"
-        tools:listitem="@layout/transfer_list_item"
+        tools:listitem="@layout/stockreq_list_item"
         android:layout_width="match_parent"
         android:paddingBottom="40dp"
         android:visibility="gone"
