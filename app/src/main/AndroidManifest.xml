@@ -91,6 +91,11 @@
             android:screenOrientation="portrait"
             />
         <activity
+            android:name=".ui.activity.TransferDraftListActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            />
+        <activity
             android:name=".ui.activity.StockRequestAddActivity"
             android:exported="false"
             android:theme="@style/AppTheme"

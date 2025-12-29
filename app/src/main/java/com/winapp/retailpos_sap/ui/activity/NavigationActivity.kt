@@ -138,6 +138,14 @@ open class NavigationActivity : AppCompatActivity() {
 
                     return@OnNavigationItemSelectedListener true
                 }
+                else if (itemId == R.id.navi_transfer_draft) {
+                    val intent: Intent
+                    intent = Intent(this@NavigationActivity, TransferDraftListActivity::class.java)
+                    startActivity(intent)
+                    drawerLayout!!.closeDrawers()
+
+                    return@OnNavigationItemSelectedListener true
+                }
                 else if (itemId == R.id.navigation_stock_request) {
                     val intent: Intent
                     intent = Intent(this@NavigationActivity, StockRequestListActivity::class.java)

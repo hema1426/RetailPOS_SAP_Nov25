@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group
-        android:id="@+id/drawermenu_group_1"
-        >
+        android:id="@+id/drawermenu_group_1">
         <item
             android:id="@+id/navigation_item_delivery"
             android:icon="@drawable/ic_receipt"
@@ -10,8 +9,7 @@
     </group>
 
     <group
-        android:id="@+id/drawermenu_group_2"
-        >
+        android:id="@+id/drawermenu_group_2">
         <item
             android:id="@+id/navigation_item_trackingInv"
             android:icon="@drawable/location_64"
@@ -25,9 +23,15 @@
             android:icon="@drawable/ic_baseline_transform_24"
             android:id="@+id/navigation_transfer"
             android:title="Transfer" />
+    </group>
+    <group
+        android:id="@+id/drawermenu_group_61">
+        <item
+            android:icon="@drawable/ic_baseline_transform_24"
+            android:id="@+id/navi_transfer_draft"
+            android:title="Transfer Draft List" />
 
     </group>
-
     <group
         android:id="@+id/drawermenu_group_60">
         <item

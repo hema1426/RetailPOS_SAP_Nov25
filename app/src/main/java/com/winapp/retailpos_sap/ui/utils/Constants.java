@@ -20,6 +20,14 @@ public class Constants extends BaseApp {
     public static String KEY_SELECT_TODATE = "selectToDate" ;
     public static String KEY_SELECT_FROMDATE = "selectFromDate";
 
+    //SQL
+    // public static String BASEURL = "http://158.140.143.87:83/api/";
+
+
+    //HANA
+    public static String BASEURL = "http://158.140.143.87:96/api/";
+
+
 // live dashboard  //url 18.138.84.16:235
     // test dashboard url http://18.138.84.16:316/es/data/api/"
 
@@ -30,7 +38,8 @@ public class Constants extends BaseApp {
 //  public static String BASEURL = "http://136.243.60.223:8090/api/";
 
   //  public static String BASEURL = "http://172.16.5.72:91/api/";
-   public static String BASEURL = "http://158.140.143.87:83/api/";
+
+
     //public static String BASEURL = "https://c21326-easysales-onlytesting.cloudiax.com/api/";
 
   //  TRANS_ORIENT_DEMO ="https://c21326-easysales-onlytesting.cloudiax.com/api/";

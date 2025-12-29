@@ -10,3 +10,6 @@ KH cycle Delivery app
 Retail  POS Demo
 http://172.16.5.72:91/api/Login
 {"Username":"SALES1","Password":"12345"}
+
+http://158.140.143.87:83/api/
+{"Username":"SALES1","Password":"123456"}
