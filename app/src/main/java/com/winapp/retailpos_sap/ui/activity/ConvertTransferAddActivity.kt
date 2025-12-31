@@ -375,7 +375,7 @@ class ConvertTransferAddActivity : BaseActivity() {
             var URL = ""
                 URL = Constants.BASEURL + "PostingInventoryTransferDraft"
                 Log.w("Given_StockRequestApi:", URL)
-                pDialog!!.setTitleText("Saving Stock Request...")
+                pDialog!!.setTitleText("Saving Transfer Draft...")
 
             pDialog!!.show()
             val salesOrderRequest: JsonObjectRequest = object : JsonObjectRequest(
@@ -398,7 +398,7 @@ class ConvertTransferAddActivity : BaseActivity() {
                                 "Transfer Saved Success...!",
                                 Toast.LENGTH_SHORT).show()
                             val intent =
-                                Intent(applicationContext, StockRequestListActivity::class.java)
+                                Intent(applicationContext, TransferDraftListActivity::class.java)
 //                            if (isPrintEnable) {
 //                                intent.putExtra("docNum", docNum)
 //                                intent.putExtra("transferType", transferType)

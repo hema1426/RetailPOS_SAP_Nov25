@@ -58,7 +58,7 @@ import java.util.Objects;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 
-public class TransferListProductActivity extends NavigationActivity implements View.OnClickListener {
+public class TransferListProductActivityCopy extends NavigationActivity implements View.OnClickListener {
 
     public RecyclerView transferListView;
     private LinearLayout transferInButton;
@@ -240,7 +240,7 @@ public class TransferListProductActivity extends NavigationActivity implements V
         mYear = c.get(Calendar.YEAR);
         mMonth = c.get(Calendar.MONTH);
         mDay = c.get(Calendar.DAY_OF_MONTH);
-        DatePickerDialog datePickerDialog = new DatePickerDialog(TransferListProductActivity.this,
+        DatePickerDialog datePickerDialog = new DatePickerDialog(TransferListProductActivityCopy.this,
                 new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
@@ -314,7 +314,7 @@ public class TransferListProductActivity extends NavigationActivity implements V
         Log.w("Given_url:", url + "---" + jsonObject.toString());
         if (dialog != null && dialog.isShowing())
             dialog.cancel();
-        dialog = new ProgressDialog(TransferListProductActivity.this);
+        dialog = new ProgressDialog(TransferListProductActivityCopy.this);
         dialog.setMessage("Loading Transfers List...");
         dialog.setCancelable(false);
 //        if (!dialog.isShowing()) {
@@ -396,7 +396,7 @@ public class TransferListProductActivity extends NavigationActivity implements V
             }
         });
         // Add JsonArrayRequest to the RequestQueue
-        requestQueue.<JSONObject>add(jsonObjectRequest);
+        requestQueue.add(jsonObjectRequest);
     }
 
     private void getTransferDetails(int copy, String transferNo, String type) throws JSONException {
@@ -440,7 +440,7 @@ public class TransferListProductActivity extends NavigationActivity implements V
                             model.setToLocationName(detailObject.optString("toWarehouseName"));
 
                             JSONArray itemsArray = detailObject.optJSONArray("itItem");
-                            for (int i = 0; i < Objects.<JSONArray>requireNonNull(itemsArray).length(); i++) {
+                            for (int i = 0; i < Objects.requireNonNull(itemsArray).length(); i++) {
                                 JSONObject objectItem = itemsArray.optJSONObject(i);
                                 TransferDetailModel.TransferDetails transferModel = new TransferDetailModel.TransferDetails();
                                 transferModel.setDescription(objectItem.optString("itemName"));
@@ -491,7 +491,7 @@ public class TransferListProductActivity extends NavigationActivity implements V
             }
         });
         // Add JsonArrayRequest to the RequestQueue
-        requestQueue.<JSONObject>add(jsonObjectRequest);
+        requestQueue.add(jsonObjectRequest);
     }
 
     public void printTransfer(String transferNo, ArrayList<TransferDetailModel> transferDetailModels, String type) {

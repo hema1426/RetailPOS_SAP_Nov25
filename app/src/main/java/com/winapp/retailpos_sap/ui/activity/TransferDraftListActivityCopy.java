@@ -18,7 +18,6 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,7 +34,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.winapp.retailpos_sap.R;
-import com.winapp.retailpos_sap.ui.adapter.StockRequestListAdapter;
+import com.winapp.retailpos_sap.ui.adapter.TransferDraftListAdapter;
 import com.winapp.retailpos_sap.ui.db.DBHelper;
 import com.winapp.retailpos_sap.ui.model.TransferDetailModel;
 import com.winapp.retailpos_sap.ui.model.TransferModel;
@@ -58,18 +57,14 @@ import java.util.Objects;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 
-public class StockRequestListActivity extends NavigationActivity implements
-        View.OnClickListener,StockRequestListAdapter.ConvertClickListener  {
+public class TransferDraftListActivityCopy extends NavigationActivity implements
+        View.OnClickListener , TransferDraftListAdapter.UploadClickListener {
 
     public RecyclerView stockRequestList;
-    private LinearLayout transferInButton;
-    private LinearLayout transferOutButton;
-    public StockRequestListAdapter requestAdapter;
+    public TransferDraftListAdapter requestAdapter;
     public ArrayList<TransferModel> requestList;
     public DBHelper dbHelper;
     private SweetAlertDialog pDialog;
-    private TextView transferInText;
-    private TextView transferOutText;
     private String username;
     private String locationCode;
     private EditText stockRequestText;
@@ -88,8 +83,6 @@ public class StockRequestListActivity extends NavigationActivity implements
     private TextView toDate;
     private TextView searchButton , btn_cancel;
     private int mYear, mMonth, mDay, mHour, mMinute;
-    private LinearLayout requestSentLayout;
-    private LinearLayout requestReceiveLayout;
     private View requestSentView;
     private View requestReceiveView;
     private String mode = "In";
@@ -103,16 +96,13 @@ public class StockRequestListActivity extends NavigationActivity implements
         super.onCreate(savedInstanceState);
         FrameLayout contentFrameLayout = findViewById(R.id.content_frame);
         //Remember this is the FrameLayout area within your activity_main.xml
-        getLayoutInflater().inflate(R.layout.activity_stock_request_list, contentFrameLayout);
-        getSupportActionBar().setTitle("Stock Request List");
+        getLayoutInflater().inflate(R.layout.activity_transfer_draft_list, contentFrameLayout);
+        getSupportActionBar().setTitle("Transfer Draft List");
         Log.w("activity_cg",getClass().getSimpleName().toString());
 
         dbHelper=new DBHelper(this);
+
         stockRequestList =findViewById(R.id.transferProductList);
-        transferInButton=findViewById(R.id.transfer_in);
-        transferOutButton=findViewById(R.id.transfer_out);
-        transferInText=findViewById(R.id.tranfer_in_text);
-        transferOutText=findViewById(R.id.transfer_out_text);
         stockRequestText =findViewById(R.id.transfer_search);
         addRequest =findViewById(R.id.add_transfer);
         emptyText=findViewById(R.id.empty_text);
@@ -120,18 +110,12 @@ public class StockRequestListActivity extends NavigationActivity implements
         requestNoTitle=findViewById(R.id.transfer_no);
         requestSentView=findViewById(R.id.request_sent_view);
         requestReceiveView=findViewById(R.id.request_receive_view);
-        requestReceiveLayout=findViewById(R.id.request_receive);
-        requestSentLayout=findViewById(R.id.request_sent);
         searchButton = findViewById(R.id.btn_search_Trans);
         fromDate = findViewById(R.id.from_date_Trans);
         toDate = findViewById(R.id.to_date_Trans);
         btn_cancel = findViewById(R.id.btn_cancel_Trans);
-        searchFilterView=findViewById(R.id.search_filter_transfer);
+        searchFilterView=findViewById(R.id.search_filter_trans_draft);
 
-        transferOutText.setOnClickListener(this);
-        transferInText.setOnClickListener(this);
-        transferOutButton.setOnClickListener(this);
-        transferInButton.setOnClickListener(this);
         session=new SessionManager(this);
         user=session.getUserDetails();
         username=user.get(SessionManager.KEY_USER_NAME);
@@ -189,49 +173,8 @@ public class StockRequestListActivity extends NavigationActivity implements
             }
         });
 
-        getStockRequestList("In",currentDate,currentDate);
+        getTransferdraftList(currentDate,currentDate);
         mode="In";
-
-        requestSentLayout.setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.O)
-            @Override
-            public void onClick(View v) {
-                requestSentView.setVisibility(View.VISIBLE);
-                requestReceiveView.setVisibility(View.GONE);
-                String fromdate=Utils.convertDate(fromDate.getText().toString(),"dd-MM-yyyy","yyyyMMdd");
-                String todate= Utils.convertDate(toDate.getText().toString(),"dd-MM-yyyy","yyyyMMdd");
-                getStockRequestList("Out",fromdate,todate);
-                mode="Out";
-                requestMode = "Sent";
-            }
-        });
-
-        requestReceiveLayout.setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.O)
-            @Override
-            public void onClick(View v) {
-                requestSentView.setVisibility(View.GONE);
-                requestReceiveView.setVisibility(View.VISIBLE);
-                String fromdate=Utils.convertDate(fromDate.getText().toString(),"dd-MM-yyyy","yyyyMMdd");
-                String todate=Utils.convertDate(toDate.getText().toString(),"dd-MM-yyyy","yyyyMMdd");
-                getStockRequestList("In",fromdate,todate);
-                mode="In";
-                requestMode = "Receive";
-            }
-        });
-
-//        addRequest.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                /*Intent intent=new Intent(getApplicationContext(),TransferActivity.class);
-//                intent.putExtra("transferType","Stock Request");
-//                startActivity(intent);*/
-//
-//                Intent intent=new Intent(getApplicationContext(), TransferInActivity.class);
-//                intent.putExtra("transferType","Stock Request");
-//                startActivity(intent);
-//            }
-//        });
 
         fromDate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -256,7 +199,7 @@ public class StockRequestListActivity extends NavigationActivity implements
                 if (!fromDate.getText().toString().isEmpty() && !toDate.getText().toString().isEmpty()){
                     String fromdate=Utils.convertDate(fromDate.getText().toString(),"dd-MM-yyyy","yyyyMMdd");
                     String todate=Utils.convertDate(toDate.getText().toString(),"dd-MM-yyyy","yyyyMMdd");
-                    getStockRequestList(mode,fromdate,todate);
+                    getTransferdraftList(fromdate,todate);
                 }else {
                     Toast.makeText(getApplicationContext(),"Select the Date to Search..!",Toast.LENGTH_SHORT).show();
                 }
@@ -282,7 +225,7 @@ public class StockRequestListActivity extends NavigationActivity implements
         mYear = c.get(Calendar.YEAR);
         mMonth = c.get(Calendar.MONTH);
         mDay = c.get(Calendar.DAY_OF_MONTH);
-        DatePickerDialog datePickerDialog = new DatePickerDialog(StockRequestListActivity.this,
+        DatePickerDialog datePickerDialog = new DatePickerDialog(TransferDraftListActivityCopy.this,
                 new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
@@ -294,20 +237,17 @@ public class StockRequestListActivity extends NavigationActivity implements
 
 
 
-    public void getStockRequestList(String mode,String fromdate,String todate){
+    public void getTransferdraftList(String fromdate, String todate){
         // Initialize a new RequestQueue instance
         RequestQueue requestQueue = Volley.newRequestQueue(this);
-        String url= Constants.BASEURL +"InventoryTransferRequestList";
+        String url= Constants.BASEURL +"InventoryTransferDraftList";
         JSONObject jsonObject=new JSONObject();
         try {
             jsonObject.put("User",username);
-            jsonObject.put("CustomerCode","");
-            jsonObject.put("VendorCode","");
             jsonObject.put("FromDate",fromdate);
             jsonObject.put("ToDate",todate);
             jsonObject.put("DocStatus","");
             jsonObject.put("WarehouseCode" ,locationCode);
-            jsonObject.put("InorOut",mode);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -315,8 +255,8 @@ public class StockRequestListActivity extends NavigationActivity implements
 
         if (dialog != null && dialog.isShowing())
             dialog.cancel();
-        dialog=new ProgressDialog(StockRequestListActivity.this);
-        dialog.setMessage("Loading StockRequest List...");
+        dialog=new ProgressDialog(TransferDraftListActivityCopy.this);
+        dialog.setMessage("Loading TransferDraft List...");
         dialog.setCancelable(false);
 //        if (!dialog.isShowing()) {
         dialog.show();
@@ -337,14 +277,25 @@ public class StockRequestListActivity extends NavigationActivity implements
                             for (int i = 0; i< transferDetailsArray.length(); i++){
                                 JSONObject object= transferDetailsArray.optJSONObject(i);
                                 TransferModel model=new TransferModel();
-                                model.setTransferNo(object.optString("invTransReqNo"));
+                                model.setTransferNo(object.optString("docNum"));
                                 model.setDate(object.optString("docDate"));
-                                model.setFromLocation(object.optString("fromWhsCode"));
-                                model.setToLocation(object.optString("toWhsCode"));
+                                model.setFromLocation(object.optString("fromWarehouse"));
+                                model.setToLocation(object.optString("toWarehouse"));
                                 model.setUser(object.optString("user"));
-                                model.setStatus(object.optString("invTransReqStatus"));
+                                model.setStatus(object.optString("docStatus"));
                                 requestList.add(model);
                             }
+//                            "docNum": "6",
+//                                    "docEntry": "4",
+//                                    "docStatus": "O",
+//                                    "docDate": "22/12/20",
+//                                    "docDueDate": "22/12/20",
+//                                    "docTotal": "207.500000",
+//                                    "remark": "",
+//                                    "fromWarehouse": "01",
+//                                    "toWarehouse": "01",
+//                                    "fromWarehouseName": "Head Office",
+//                                    "toWarehouseName": "Head Office"
                             if (requestList.size()>0){
                                 stockRequestList.setVisibility(View.VISIBLE);
                                 emptyText.setVisibility(View.GONE);
@@ -394,14 +345,15 @@ public class StockRequestListActivity extends NavigationActivity implements
             }
         });
         // Add JsonArrayRequest to the RequestQueue
-        requestQueue.add(jsonObjectRequest);
+        requestQueue.<JSONObject>add(jsonObjectRequest);
     }
 
     public void setTransferListAdapter(ArrayList<TransferModel> stockRequestList){
         //try {
             transferSize.setText("(" + stockRequestList.size() + ")" + " Products") ;
 
-            requestAdapter = new StockRequestListAdapter(this, stockRequestList, this, new StockRequestListAdapter.CallBack() {
+            requestAdapter = new TransferDraftListAdapter(this, stockRequestList,
+                    new TransferDraftListAdapter.CallBack() {
                 @Override
                 public void callDescription(String requestNo,String mode) {
                     Log.w("GivenTransferNo::", requestNo.toString());
@@ -427,7 +379,7 @@ public class StockRequestListActivity extends NavigationActivity implements
                         e.printStackTrace();
                     }
                 }
-            });
+            },this);
             int mNoOfColumns = Utils.calculateNoOfColumns(getApplicationContext(),200);
             this.stockRequestList.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
             this.stockRequestList.setItemAnimator(new DefaultItemAnimator());
@@ -484,7 +436,7 @@ public class StockRequestListActivity extends NavigationActivity implements
                             model.setToLocationName(detailObject.optString("toWarehouseName"));
 
                             JSONArray itemsArray=detailObject.optJSONArray("itItem");
-                            for (int i = 0; i< Objects.requireNonNull(itemsArray).length(); i++){
+                            for (int i = 0; i< Objects.<JSONArray>requireNonNull(itemsArray).length(); i++){
                                 JSONObject objectItem= itemsArray.optJSONObject(i);
                                 TransferDetailModel.TransferDetails transferModel =new TransferDetailModel.TransferDetails();
                                 transferModel.setItemCode(objectItem.optString("itemCode"));
@@ -537,7 +489,7 @@ public class StockRequestListActivity extends NavigationActivity implements
             }
         });
         // Add JsonArrayRequest to the RequestQueue
-        requestQueue.add(jsonObjectRequest);
+        requestQueue.<JSONObject>add(jsonObjectRequest);
     }
     public void convertAndRedirect(String requestNo,ArrayList<TransferDetailModel> transferDetailModels,ArrayList<TransferDetailModel.TransferDetails> transferDetail){
         String return_qty="0";
@@ -605,6 +557,9 @@ public class StockRequestListActivity extends NavigationActivity implements
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.transfer_list_menu, menu);
+
+        MenuItem action_add = menu.findItem(R.id.action_add);
+        action_add.setVisible(false);
         return true;
     }
 
@@ -648,7 +603,7 @@ public class StockRequestListActivity extends NavigationActivity implements
         popupMenu.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.convert_transfer_menu) {
 
-             Intent intent=new Intent(StockRequestListActivity.this, ConvertTransferAddActivity.class);
+             Intent intent=new Intent(TransferDraftListActivityCopy.this, ConvertTransferAddActivity.class);
              intent.putExtra("convertTranferNo",transferModels.transferNo);
 
              startActivity(intent);
@@ -661,7 +616,7 @@ public class StockRequestListActivity extends NavigationActivity implements
     }
 
     @Override
-    public void convertSelected(TransferModel transferModels, View view) {
-        showPopupMenu(transferModels,view);
+    public void uploadSelected(TransferModel transferModels, View view) {
+
     }
 }

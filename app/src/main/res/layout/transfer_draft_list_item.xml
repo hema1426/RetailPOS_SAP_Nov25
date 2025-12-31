@@ -132,7 +132,7 @@
                             android:layout_height="wrap_content"/>
 
                         <ImageView
-                            android:id="@+id/three_dot_req"
+                            android:id="@+id/three_dot_draft"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:layout_alignParentRight="true"
@@ -140,7 +140,7 @@
                             android:layout_marginRight="5dp"
                             android:padding="5dp"
                             android:src="@drawable/three_dot"
-                            android:visibility="gone" />
+                            android:visibility="visible" />
                     </LinearLayout>
 
                 </LinearLayout>

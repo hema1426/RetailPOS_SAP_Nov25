@@ -64,7 +64,7 @@ public class TransferDraftListAdapter extends RecyclerView.Adapter<TransferDraft
     private SessionManager session;
     private String locationCode;
     private HashMap<String,String> user;
-     public ConvertClickListener convertClickListener ;
+     public UploadClickListener uploadClickListener ;
     private ArrayList<TransferDetailModel> transferDetailModels;
     private ArrayList<TransferDetailModel.TransferDetails> transferDetailsList;
     private TransferDraftListDetailAdapter adapter;
@@ -100,13 +100,13 @@ public class TransferDraftListAdapter extends RecyclerView.Adapter<TransferDraft
             thumbnail = view.findViewById(R.id.more_option);
             printPreview=view.findViewById(R.id.print_preview);
             convertTransfer=view.findViewById(R.id.convert);
-            threedot_reql=view.findViewById(R.id.three_dot_req);
             req_img_down=view.findViewById(R.id.req_img_down);
             rv_stockReqList=view.findViewById(R.id.stockReq_detailList);
             emptyLay=view.findViewById(R.id.progress_layout);
             bottom_lay=view.findViewById(R.id.bottom_layouta);
             stockDetailLayl=view.findViewById(R.id.stockDetailLay);
             statusLayout =view.findViewById(R.id.statusLay);
+            threedot_reql =view.findViewById(R.id.three_dot_draft);
            // progressBar = view.findViewById(R.id.progressBar);
            // statusLayout = view.findViewById(R.id.status_layout);
         }
@@ -119,9 +119,10 @@ public class TransferDraftListAdapter extends RecyclerView.Adapter<TransferDraft
      * @param transferList
      */
     public TransferDraftListAdapter(Context mContext, ArrayList<TransferModel> transferList,
-     CallBack callBack ) {
+     CallBack callBack , UploadClickListener uploadClickListener) {
         this.mContext = mContext;
         this.transferList = transferList;
+        this.uploadClickListener = uploadClickListener;
         this.callBack = callBack;
         this.transferListFilter = new ArrayList<>(transferList);
         session=new SessionManager(mContext);
@@ -226,7 +227,7 @@ public class TransferDraftListAdapter extends RecyclerView.Adapter<TransferDraft
             holder.threedot_reql.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    convertClickListener.convertSelected(model,view);
+                    uploadClickListener.uploadSelected(model,view);
                 }
             });
             holder.print.setOnClickListener(new View.OnClickListener() {
@@ -270,8 +271,8 @@ public class TransferDraftListAdapter extends RecyclerView.Adapter<TransferDraft
         void callDescription(String transferId,String mode);
         void convertTransfer(String requestId);
     }
-    public interface ConvertClickListener {
-        void convertSelected(TransferModel transferModels, View view);
+    public interface UploadClickListener {
+        void uploadSelected(TransferModel transferModels, View view);
     }
 
     public Bitmap getImage(String base64String) {

@@ -5,24 +5,19 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.PopupMenu;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
@@ -38,7 +33,6 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.winapp.retailpos_sap.R;
 import com.winapp.retailpos_sap.ui.activity.StockRequestListActivity;
-import com.winapp.retailpos_sap.ui.activity.TransferPreviewPrintActivity;
 import com.winapp.retailpos_sap.ui.model.TransferDetailModel;
 import com.winapp.retailpos_sap.ui.model.TransferModel;
 import com.winapp.retailpos_sap.ui.utils.Constants;
@@ -53,8 +47,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import cn.pedant.SweetAlert.SweetAlertDialog;
 
 public class StockRequestListAdapter extends RecyclerView.Adapter<StockRequestListAdapter.TransferViewHolder> implements Filterable {
     /**

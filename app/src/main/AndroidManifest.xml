@@ -74,7 +74,7 @@
             android:screenOrientation="portrait"
             />
         <activity
-            android:name=".ui.activity.TransferPreviewPrintActivity"
+            android:name=".ui.activity.TransferPreviewPrintActivityCopy"
             android:exported="false"
             android:theme="@style/AppTheme"
             android:screenOrientation="portrait"
