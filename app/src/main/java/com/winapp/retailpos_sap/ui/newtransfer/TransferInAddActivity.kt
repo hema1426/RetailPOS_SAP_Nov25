@@ -1,12 +1,21 @@
 package com.winapp.retailpos_sap.ui.newtransfer
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
+import android.content.DialogInterface
 import android.content.Intent
+import android.database.Cursor
 import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.drawable.Drawable
 import android.media.MediaPlayer
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
+import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Base64
@@ -23,6 +32,7 @@ import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import android.widget.Toolbar
@@ -31,6 +41,8 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.AppCompatSpinner
+import androidx.appcompat.widget.SwitchCompat
+import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -40,8 +52,20 @@ import com.android.volley.RetryPolicy
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
+import com.karumi.dexter.Dexter
+import com.karumi.dexter.MultiplePermissionsReport
+import com.karumi.dexter.PermissionToken
+import com.karumi.dexter.listener.DexterError
+import com.karumi.dexter.listener.PermissionRequest
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import com.winapp.retailpos_sap.BuildConfig
 import com.winapp.retailpos_sap.R
 import com.winapp.retailpos_sap.ui.activity.BaseActivity
 import com.winapp.retailpos_sap.ui.activity.StockRequestListActivity
@@ -51,6 +75,7 @@ import com.winapp.retailpos_sap.ui.newtransfer.LocationModel.LocationDetails
 import com.winapp.retailpos_sap.ui.newtransfer.TransferInModel.TransferInDetails
 import com.winapp.retailpos_sap.ui.utils.CaptureSignatureView
 import com.winapp.retailpos_sap.ui.utils.Constants
+import com.winapp.retailpos_sap.ui.utils.FileCompressor
 import com.winapp.retailpos_sap.ui.utils.ImageUtil
 import com.winapp.retailpos_sap.ui.utils.SessionManager
 import com.winapp.retailpos_sap.ui.utils.SharedPreferenceUtil
@@ -58,8 +83,11 @@ import com.winapp.retailpos_sap.ui.utils.Utils
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import java.io.File
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 import java.util.Objects
 
@@ -99,6 +127,17 @@ class TransferInAddActivity : BaseActivity() {
     private var okButton: Button? = null
     private var alert: AlertDialog? = null
     var invoicePrintCheck: CheckBox? = null
+    var uploadImgDialog_txt: TextView? = null
+    var mPhotoFile: File? = null
+    var mCompressor: FileCompressor? = null
+
+    val REQUEST_TAKE_PHOTO = 1
+    val REQUEST_GALLERY_PHOTO = 2
+    var alertUpload: AlertDialog? = null
+
+    var uploadImgDialogLay: LinearLayout? = null
+    var addSignat_Imgl: ImageView? = null
+
     var saveTitle: TextView? = null
     var signatureCapture: ImageView? = null
     var attachement_layoutInvl: LinearLayout? = null
@@ -122,6 +161,8 @@ class TransferInAddActivity : BaseActivity() {
         user = session!!.getUserDetails()
         progressDialog = ProgressDialog(this)
         sharedPreferenceUtil = SharedPreferenceUtil(this)
+        mCompressor = FileCompressor(this)
+
         //  settingUOMval = sharedPreferenceUtil.getStringPreference(sharedPreferenceUtil.KEY_SETTING_TRANS_UOM, "");
         Log.w("transferUOM..", "" + settingUOMval)
         companyCode = user!!.get(SessionManager.KEY_COMPANY_CODE)
@@ -339,6 +380,40 @@ class TransferInAddActivity : BaseActivity() {
             Log.e("TAG", "Error in Populating the data:" + ex.message)
         }
     }
+    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQUEST_TAKE_PHOTO) {
+                try {
+                    mPhotoFile = mCompressor!!.compressToFile(mPhotoFile)
+                    imageString = ImageUtil.getBase64StringImage(mPhotoFile)
+                    //  Log.w("GivenImage1:",imageString);
+                    Utils.w("GivenImage1Pick", imageString)
+                    showImage()
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+                /* Glide.with(MainActivity.this)
+                        .load(mPhotoFile)
+                        .apply(new RequestOptions().centerCrop()
+                                .circleCrop()
+                                .placeholder(R.drawable.profile_pic_place_holder))
+                        .into(imageViewProfilePic);*/
+            } else if (requestCode == REQUEST_GALLERY_PHOTO) {
+                val selectedImage = data!!.data
+                try {
+                    mPhotoFile =
+                        mCompressor!!.compressToFile(File(getRealPathFromUri(selectedImage)))
+                    uploadImgDialog_txt!!.setText(selectedImage.toString())
+                    imageString = ImageUtil.getBase64StringImage(mPhotoFile)
+                    // Log.w("GivenImage2:",imageString);
+                    Utils.w("GivenImage2Pick", imageString)
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
 
     fun showSaveAlert(mode: String?) {
         try {
@@ -346,7 +421,7 @@ class TransferInAddActivity : BaseActivity() {
             val builder = AlertDialog.Builder(this)
             // set the custom layout
             builder.setCancelable(false)
-            val customLayout = layoutInflater.inflate(R.layout.invoice_save_option, null)
+            val customLayout = layoutInflater.inflate(R.layout.transfer_save_option, null)
             builder.setView(customLayout)
             // add a button
             okButton = customLayout.findViewById(R.id.btn_ok)
@@ -356,7 +431,6 @@ class TransferInAddActivity : BaseActivity() {
             saveTitle = customLayout.findViewById(R.id.save_title)
             signatureCapture = customLayout.findViewById(R.id.signature_capture)
             attachement_layoutInvl = customLayout.findViewById(R.id.attachement_layoutInv)
-            attachement_layoutInvl!!.setVisibility(View.GONE)
             val noOfCopy = customLayout.findViewById<TextView>(R.id.no_of_copy)
             val copyPlus = customLayout.findViewById<Button>(R.id.increase)
             val copyMinus = customLayout.findViewById<Button>(R.id.decrease)
@@ -365,10 +439,16 @@ class TransferInAddActivity : BaseActivity() {
 
             //invoicePrintCheck.setVisibility(View.GONE);
             if (mode == "Transfer In" || mode == "Transfer Out" || mode == "Covert Transfer") {
+                attachement_layoutInvl!!.setVisibility(View.GONE)
+                signatureButton!!.setVisibility(View.VISIBLE)
+
                 saveTitle!!.setText("Save Transfer")
                 saveMessage!!.setText("Are you sure want to save Transfer?")
                 invoicePrintCheck!!.setText("Transfer Print")
             } else {
+                attachement_layoutInvl!!.setVisibility(View.GONE)
+                signatureButton!!.setVisibility(View.GONE)
+
                 saveTitle!!.setText("Save Stock Request")
                 saveMessage!!.setText("Are you sure want to save Stock Request?")
                 invoicePrintCheck!!.setText("Stock Request Print")
@@ -403,7 +483,10 @@ class TransferInAddActivity : BaseActivity() {
                     noOfCopy.text = copy.toString() + ""
                 }
             }
-            signatureButton.setOnClickListener { showSignatureAlert() }
+            signatureButton.setOnClickListener {
+                //showSignatureAlert()
+                showUploadImageAlert()
+            }
             cancelButton!!.setOnClickListener(View.OnClickListener { alert!!.dismiss() })
             // create and show the alert dialog
             alert = builder.create()
@@ -411,7 +494,345 @@ class TransferInAddActivity : BaseActivity() {
         } catch (exception: Exception) {
         }
     }
+    fun showUploadImageAlert() {
+        val alertDialog = AlertDialog.Builder(this@TransferInAddActivity)
+        val customLayout: View = layoutInflater.inflate(R.layout.pick_image_upload_dialog, null)
+        alertDialog.setView(customLayout)
+        uploadImgDialogLay = customLayout.findViewById<LinearLayout>(R.id.attachement_layout_inv)
+        uploadImgDialog_txt = customLayout.findViewById<TextView>(R.id.select_Img_pickdel)
+        signatureCapture = customLayout.findViewById(R.id.signature_capture)
+        addSignat_Imgl = customLayout.findViewById<ImageView>(R.id.addSignat_Img)
+        val submit_imgl = customLayout.findViewById<TextView>(R.id.submit_img_inv)
+        val invNo_txt = customLayout.findViewById<TextView>(R.id.invNo_txt_edit)
+        val close_btn_edit_invl = customLayout.findViewById<ImageView>(R.id.close_btn_pickdel)
+        val closeButton = customLayout.findViewById<ImageView>(R.id.btnCloseSignature)
 
+        val mSig = CaptureSignatureView(this@TransferInAddActivity, null)
+        // mContent.addView(mSig, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        invNo_txt.text = transferType
+//        Log.w("pickmodelaa:", pickModel.code!!)
+
+        uploadImgDialog_txt!!.setOnClickListener {
+            if (uploadImgDialog_txt!!.getTag() == "view_image") {
+                showImage()
+            } else {
+                selectImage()
+            }
+        }
+
+        if (mPhotoFile != null && mPhotoFile!!.length() > 0) {
+            uploadImgDialog_txt!!.setText("View Image")
+            uploadImgDialog_txt!!.setTag("view_image")
+        } else {
+            uploadImgDialog_txt!!.setText("Select Image")
+            uploadImgDialog_txt!!.setTag("select_image")
+        }
+
+        addSignat_Imgl!!.setOnClickListener {
+            showSignatureAlert()
+        }
+        closeButton.setOnClickListener {
+            signatureString = ""
+            Utils.setSignature("")
+            signatureCapture?.setImageDrawable(null)
+           // mSig.ClearCanvas()
+            signatureAlert?.dismiss()
+        }
+
+        close_btn_edit_invl.setOnClickListener {
+            imageString = ""
+            signatureString = ""
+            mPhotoFile = null
+            alertUpload!!.dismiss()
+        }
+
+        submit_imgl.setOnClickListener {
+            alertUpload!!.dismiss()
+//
+//            if(signatureString.isNotEmpty() || imageString!!.isNotEmpty()){
+//                spinnertxt_dialog = "OC"
+//                packStatusStr = "Picked" // todo
+//
+//                val sdf = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+//                val currentDateandTime = sdf.format(Date())
+//                currentSaveDateTime = currentDateandTime
+//
+//                try {
+//                    val obj = JSONObject()
+//                    obj.put("invoiceNumber", invoiceNumber)
+//                    obj.put("currentDateTime", currentSaveDateTime)
+//                    obj.put("customerCode", custCode)
+//                    obj.put("Username", username)
+//                    obj.put("status", spinnertxt_dialog)
+//                    obj.put("PackStatus", packStatusStr)
+//                    obj.put("Remark", "")
+//                    obj.put("latitude", current_latitude)
+//                    obj.put("longitude", current_longitude)
+//                    obj.put("CurrentAddress", current_addr)
+//                    obj.put("SendMail", "")
+//                    obj.put("image", imageString)
+//                    obj.put("signature", signatureString)
+//
+//                    Log.w("imgSign_","$obj")
+//
+//                    savePicklistDeliveryApi(obj,null,"false")
+//                } catch (e: JSONException) {
+//                    throw RuntimeException(e)
+//                }
+//            }else{
+//                Toast.makeText(applicationContext,  "Choose any one of the option !", Toast.LENGTH_SHORT).show()
+
+//                if (spinner_pickStatus!!.selectedItem.equals("Picked")) {
+//                    spinnertxt_dialog = "OC"
+//                } else  {
+//                    spinnertxt_dialog = "O"
+//                }
+                // //  spinnertxt_dialog = "OC"
+//}
+//            {"invoiceNumber":"18","currentDateTime":"20250616_171118","customerCode":"0005","Username":"ST01",
+//            "status":"C",
+//                "latitude":"10.96440894","longitude":"78.44143506","image":"","signature":""}
+
+        }
+        alertUpload = alertDialog.create()
+        alertUpload!!.setCanceledOnTouchOutside(false)
+        alertUpload!!.show()
+    }
+
+    fun showImage() {
+        val builder = AlertDialog.Builder(this@TransferInAddActivity)
+        val inflater = layoutInflater
+        val dialogView = inflater.inflate(R.layout.image_view_layout, null)
+        val imageView = dialogView.findViewById<ImageView>(R.id.invoice_image)
+        val btnClose = dialogView.findViewById<ImageView>(R.id.btnClose)
+
+        val dialog = builder
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+        btnClose.setOnClickListener {
+            mPhotoFile = null
+            imageView.setImageDrawable(null)
+
+            uploadImgDialog_txt?.tag = ""
+            uploadImgDialog_txt?.text = "Upload Image"
+
+            dialog.dismiss()
+        }
+
+        Glide.with(this)
+            .load(mPhotoFile)
+            .error(R.drawable.no_image_found)
+            .listener(object : RequestListener<Drawable?> {
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any,
+                    target: com.bumptech.glide.request.target.Target<Drawable?>,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    return false
+                }
+
+                override fun onResourceReady(
+                    resource: Drawable?,
+                    model: Any,
+                    target: Target<Drawable?>,
+                    dataSource: DataSource,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    return false
+                }
+            }).into(imageView)
+
+        dialogView.findViewById<TextView>(R.id.btnNewImage).setOnClickListener {
+            dialog.dismiss()
+            selectImage()
+        }
+
+        dialogView.findViewById<TextView>(R.id.btnOk).setOnClickListener {
+            uploadImgDialog_txt?.tag = "view_image"
+            uploadImgDialog_txt?.text = "View Image"
+            dialog.dismiss()
+        }
+
+        dialog.show()
+
+//        builder.setCancelable(false)
+//        builder.setTitle("Invoice Image")
+//        builder.setView(dialogView)
+//
+//        builder.setNeutralButton(
+//            "NEW IMAGE"
+//        ) { dialogInterface, i ->
+//            selectImage() }
+//        builder.setPositiveButton(
+//            "OK"
+//        ) { dialog, which ->
+//            uploadImgDialog_txt!!.setTag("view_image")
+//            uploadImgDialog_txt!!.setText("View Image")
+//            dialog.dismiss()
+//        }.create().show()
+    }
+
+    fun selectImage() {
+        val items = arrayOf<CharSequence>(
+            "Take Photo",  /* "Choose from Library",*/
+            "Cancel"
+        )
+        val builder = AlertDialog.Builder(this@TransferInAddActivity)
+        builder.setItems(
+            items
+        ) { dialog: DialogInterface, item: Int ->
+            if (items[item] == "Take Photo") {
+                requestStoragePermission(true)
+            } //else if (items[item].equals("Choose from Library")) {
+            else if (items[item] == "Cancel") {
+                dialog.dismiss()
+            }
+        }
+        builder.show()
+    }
+    fun getRealPathFromUri(contentUri: Uri?): String? {
+        var cursor: Cursor? = null
+        return try {
+            val proj = arrayOf(MediaStore.Images.Media.DATA)
+            cursor = contentResolver.query(contentUri!!, proj, null, null, null)
+            assert(cursor != null)
+            val column_index = cursor!!.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+            cursor.moveToFirst()
+            cursor.getString(column_index)
+        } finally {
+            cursor?.close()
+        }
+    }
+
+    private fun requestStoragePermission(isCamera: Boolean) {
+        var permission = arrayOf<String?>(
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.CAMERA
+        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permission = arrayOf(
+                Manifest.permission.READ_MEDIA_IMAGES,
+                Manifest.permission.CAMERA
+            )
+        }
+        Dexter.withContext(this)
+            .withPermissions(*permission)
+            .withListener(object : MultiplePermissionsListener {
+                override fun onPermissionsChecked(report: MultiplePermissionsReport) {
+                    // check if all permissions are granted
+                    if (report.areAllPermissionsGranted()) {
+                        if (isCamera) {
+                            dispatchTakePictureIntent()
+                        } else {
+                            dispatchGalleryIntent()
+                        }
+                    }
+                    for (i in report.deniedPermissionResponses.indices) {
+                        Log.d("cg_perm", report.deniedPermissionResponses[i].permissionName)
+                    }
+                    // check for permanent denial of any permission
+                    if (report.isAnyPermissionPermanentlyDenied) {
+                        // show alert dialog navigating to Settings
+                        showSettingsDialog()
+                    }
+                }
+
+                override fun onPermissionRationaleShouldBeShown(
+                    permissions: List<PermissionRequest>,
+                    token: PermissionToken
+                ) {
+                    token.continuePermissionRequest()
+                }
+            })
+            .withErrorListener { error: DexterError? ->
+                Toast.makeText(applicationContext, "Error occurred! ", Toast.LENGTH_SHORT)
+                    .show()
+            }
+            .onSameThread()
+            .check()
+    }
+
+    private fun dispatchTakePictureIntent() {
+        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        if (takePictureIntent.resolveActivity(packageManager) != null) {
+            // Create the File where the photo should go
+            var photoFile: File? = null
+            try {
+                photoFile = createImageFile()
+            } catch (ex: IOException) {
+                ex.printStackTrace()
+                // Error occurred while creating the File
+            }
+            if (photoFile != null) {
+                val photoURI = FileProvider.getUriForFile(
+                    this,
+                    BuildConfig.APPLICATION_ID + ".provider",
+                    photoFile
+                )
+                mPhotoFile = photoFile
+                Log.w("uploadImgpic",""+mPhotoFile);
+
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO)
+            }
+        }
+    }
+
+    /**
+     * Select image fro gallery
+     */
+    private fun dispatchGalleryIntent() {
+        val pickPhoto = Intent(
+            Intent.ACTION_PICK,
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        )
+        pickPhoto.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        startActivityForResult(pickPhoto, REQUEST_GALLERY_PHOTO)
+    }
+    private fun switchColor(switchPicklist: SwitchCompat?,checked: Boolean) {
+        switchPicklist!!.getThumbDrawable().setColorFilter(
+            if (checked) Color.BLACK
+            else Color.parseColor("#F95B24"),
+            PorterDuff.Mode.MULTIPLY)
+        switchPicklist!!.getTrackDrawable().setColorFilter(
+            if (!checked) Color.BLACK
+            else Color.parseColor("#F95B24"),
+            PorterDuff.Mode.MULTIPLY
+        )
+    }
+    @Throws(IOException::class)
+    private fun createImageFile(): File {
+        // Create an image file name
+        val timeStamp =
+            SimpleDateFormat("yyyyMMddHHmmss").format(Date())
+        val mFileName = "JPEG_" + timeStamp + "_"
+        val storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile(mFileName, ".jpg", storageDir)
+    }
+
+    private fun showSettingsDialog() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Need Permissions")
+        builder.setMessage(
+            "This app needs permission to use this feature. You can grant them in app settings."
+        )
+        builder.setPositiveButton("GOTO SETTINGS") { dialog: DialogInterface, which: Int ->
+            dialog.cancel()
+            openSettings()
+        }
+        builder.setNegativeButton(
+            "Cancel"
+        ) { dialog: DialogInterface, which: Int -> dialog.cancel() }
+        builder.show()
+    }
+    private fun openSettings() {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+        val uri = Uri.fromParts("package", packageName, null)
+        intent.setData(uri)
+        startActivityForResult(intent, 101)
+    }
     fun showSignatureAlert() {
         val alertDialog = AlertDialog.Builder(this)
         val customLayout = layoutInflater.inflate(R.layout.signature_layout, null)
@@ -419,6 +840,7 @@ class TransferInAddActivity : BaseActivity() {
         val acceptButton = customLayout.findViewById<Button>(R.id.buttonYes)
         val cancelButton = customLayout.findViewById<Button>(R.id.buttonNo)
         val clearButton = customLayout.findViewById<Button>(R.id.buttonClear)
+
         val mContent = customLayout.findViewById<LinearLayout>(R.id.signature_layout)
         acceptButton.setEnabled(false)
         acceptButton.setAlpha(0.4f)
@@ -445,6 +867,7 @@ class TransferInAddActivity : BaseActivity() {
             Utils.setSignature("")
             mSig.ClearCanvas()
         }
+
         signatureAlert = alertDialog.create()
         signatureAlert!!.setCanceledOnTouchOutside(false)
         signatureAlert!!.show()
@@ -498,6 +921,8 @@ class TransferInAddActivity : BaseActivity() {
                 itemsObject.put("lineNum", "")
                 itemsObject.put("batchNum", "")
                 itemsObject.put("serialNum", "")
+                itemsObject.put("image", imageString)
+                itemsObject.put("signature", signatureString)
                 itemsArray.put(itemsObject)
                 index++
             }
@@ -537,7 +962,8 @@ class TransferInAddActivity : BaseActivity() {
                     var responseData: JSONObject? = null
                     responseData = response.optJSONObject("responseData")
                     if (statusCode == "1") {
-                        if (transferType == "Transfer In" || transferType == "Transfer Out" || transferType == "Covert Transfer") {
+                        if (transferType == "Transfer In" || transferType == "Transfer Out"
+                            || transferType == "Covert Transfer") {
                             assert(responseData != null)
                             val docNum = responseData.optString("docNum")
                             Toast.makeText(
@@ -567,6 +993,8 @@ class TransferInAddActivity : BaseActivity() {
                                 intent.putExtra("docNum", docNum)
                                 intent.putExtra("transferType", transferType)
                             }
+                            intent.putExtra("docNumlist", docNum)
+                            intent.putExtra("transferTypelist", transferType)
                             startActivity(intent)
                             finish()
                         }

@@ -305,6 +305,7 @@ class StockRequestAddActivity : BaseActivity() {
             val copyPlus = customLayout.findViewById<Button>(R.id.increase)
             val copyMinus = customLayout.findViewById<Button>(R.id.decrease)
             val signatureButton = customLayout.findViewById<Button>(R.id.btn_signature)
+            signatureButton!!.visibility = View.GONE
             val copyLayout = customLayout.findViewById<LinearLayout>(R.id.print_layout)
 
                 saveTitle!!.setText("Save Stock Request")
@@ -469,6 +470,8 @@ class StockRequestAddActivity : BaseActivity() {
                                 intent.putExtra("docNum", docNum)
                                 intent.putExtra("transferType", transferType)
                         }
+                        intent.putExtra("docNumlist", docNum)
+                        intent.putExtra("transferTypelist", transferType)
                         startActivity(intent)
                         finish()
                     } else {

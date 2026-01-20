@@ -81,6 +81,7 @@ public class StockRequestListActivity extends NavigationActivity implements
     ArrayList<TransferDetailModel> transferDetailModels;
     ArrayList<TransferDetailModel.TransferDetails> transferDetailsList;
     public String transferType = "Transfer In";
+    public String transferTypeList = "Receive";
     public Button addRequest;
     public TextView emptyText , transferSize;
     public TextView requestNoTitle;
@@ -189,9 +190,23 @@ public class StockRequestListActivity extends NavigationActivity implements
                 }
             }
         });
+//        if (getIntent()!=null) {
+//            transferTypeList = getIntent().getStringExtra("transferTypelist");
+////            assert docNumber != null;
+//            if (transferTypeList != null && !transferTypeList.isEmpty()) {
+//                if(transferTypeList.equals("Receive")) {
+//                    getStockRequestList("In", currentDate, currentDate);
+//                    mode = "In";
+//                }else{
+//                    getStockRequestList("Out",currentDate,currentDate);
+//                    mode="Out";
+//                }
+//            }
+//            Log.w("transfertyplist",""+transferTypeList);
+//        }
 
-        getStockRequestList("In",currentDate,currentDate);
-        mode="In";
+        getStockRequestList("In", currentDate, currentDate);
+        mode = "In";
 
         requestSentLayout.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
