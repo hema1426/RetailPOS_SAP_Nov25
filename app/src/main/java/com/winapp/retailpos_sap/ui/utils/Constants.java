@@ -21,11 +21,11 @@ public class Constants extends BaseApp {
     public static String KEY_SELECT_FROMDATE = "selectFromDate";
 
     //SQL
-    // public static String BASEURL = "http://158.140.143.87:83/api/";
+     public static String BASEURL = "http://158.140.143.87:83/api/";
 
 
     //HANA
-    public static String BASEURL = "http://158.140.143.87:96/api/";
+ //   public static String BASEURL = "http://158.140.143.87:96/api/";
 
 
 // live dashboard  //url 18.138.84.16:235

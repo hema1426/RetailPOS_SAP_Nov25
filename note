@@ -8,8 +8,8 @@ KH cycle Delivery app
 "Username":"SALES1","Password":"KH@12345"
 
 Retail  POS Demo
-http://172.16.5.72:91/api/Login
+http://172.16.5.72:91/api/Login  //hana
 {"Username":"SALES1","Password":"12345"}
 
-http://158.140.143.87:83/api/
+http://158.140.143.87:83/api/  //sql
 {"Username":"SALES1","Password":"123456"}

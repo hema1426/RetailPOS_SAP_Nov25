@@ -46,7 +46,7 @@ class SplashScreenActivity : AppCompatActivity() {
         textView1!!.setAnimation(bottom)
         textView2!!.setAnimation(bottom)
         version_txtl = findViewById<TextView>(R.id.version_txt)
-      //  version_txtl!!.setText(Constants.VERSION_CODE)
+        version_txtl!!.setText("Version 1.0") //20.1.26
 
         // Store the Remember me to Session..
         // Set the Preference value in edittext for Remembering the values

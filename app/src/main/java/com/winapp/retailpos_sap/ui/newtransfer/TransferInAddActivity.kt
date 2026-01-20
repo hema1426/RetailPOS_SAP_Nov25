@@ -68,6 +68,7 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import com.winapp.retailpos_sap.BuildConfig
 import com.winapp.retailpos_sap.R
 import com.winapp.retailpos_sap.ui.activity.BaseActivity
+import com.winapp.retailpos_sap.ui.activity.StockRequestAddActivity
 import com.winapp.retailpos_sap.ui.activity.StockRequestListActivity
 import com.winapp.retailpos_sap.ui.activity.TransferListProductActivity
 import com.winapp.retailpos_sap.ui.model.ItemGroupList
@@ -139,6 +140,7 @@ class TransferInAddActivity : BaseActivity() {
     var addSignat_Imgl: ImageView? = null
 
     var saveTitle: TextView? = null
+    var signatureCapturetrans: ImageView? = null
     var signatureCapture: ImageView? = null
     var attachement_layoutInvl: LinearLayout? = null
     private var signatureAlert: AlertDialog? = null
@@ -162,6 +164,8 @@ class TransferInAddActivity : BaseActivity() {
         progressDialog = ProgressDialog(this)
         sharedPreferenceUtil = SharedPreferenceUtil(this)
         mCompressor = FileCompressor(this)
+        imageString = ""
+        signatureString = ""
 
         //  settingUOMval = sharedPreferenceUtil.getStringPreference(sharedPreferenceUtil.KEY_SETTING_TRANS_UOM, "");
         Log.w("transferUOM..", "" + settingUOMval)
@@ -429,13 +433,24 @@ class TransferInAddActivity : BaseActivity() {
             invoicePrintCheck = customLayout.findViewById(R.id.invoice_print_check)
             saveMessage = customLayout.findViewById(R.id.save_message)
             saveTitle = customLayout.findViewById(R.id.save_title)
-            signatureCapture = customLayout.findViewById(R.id.signature_capture)
+            signatureCapturetrans = customLayout.findViewById(R.id.signature_capture_transf)
             attachement_layoutInvl = customLayout.findViewById(R.id.attachement_layoutInv)
             val noOfCopy = customLayout.findViewById<TextView>(R.id.no_of_copy)
             val copyPlus = customLayout.findViewById<Button>(R.id.increase)
             val copyMinus = customLayout.findViewById<Button>(R.id.decrease)
             val signatureButton = customLayout.findViewById<Button>(R.id.btn_signature)
             val copyLayout = customLayout.findViewById<LinearLayout>(R.id.print_layout)
+
+            val closeButton = customLayout.findViewById<ImageView>(R.id.btnCloseSign_Save)
+
+            closeButton.setOnClickListener {
+                signatureString = ""
+                Utils.setSignature("")
+                signatureCapture?.setImageDrawable(null)
+                signatureCapturetrans?.setImageDrawable(null)
+                // mSig.ClearCanvas()
+                signatureAlert?.dismiss()
+            }
 
             //invoicePrintCheck.setVisibility(View.GONE);
             if (mode == "Transfer In" || mode == "Transfer Out" || mode == "Covert Transfer") {
@@ -506,9 +521,10 @@ class TransferInAddActivity : BaseActivity() {
         val invNo_txt = customLayout.findViewById<TextView>(R.id.invNo_txt_edit)
         val close_btn_edit_invl = customLayout.findViewById<ImageView>(R.id.close_btn_pickdel)
         val closeButton = customLayout.findViewById<ImageView>(R.id.btnCloseSignature)
+        val mContent = customLayout.findViewById<LinearLayout>(R.id.signature_layout)
 
         val mSig = CaptureSignatureView(this@TransferInAddActivity, null)
-        // mContent.addView(mSig, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+         //mContent.addView(mSig, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
         invNo_txt.text = transferType
 //        Log.w("pickmodelaa:", pickModel.code!!)
 
@@ -535,6 +551,7 @@ class TransferInAddActivity : BaseActivity() {
             signatureString = ""
             Utils.setSignature("")
             signatureCapture?.setImageDrawable(null)
+            signatureCapturetrans?.setImageDrawable(null)
            // mSig.ClearCanvas()
             signatureAlert?.dismiss()
         }
@@ -548,7 +565,11 @@ class TransferInAddActivity : BaseActivity() {
 
         submit_imgl.setOnClickListener {
             alertUpload!!.dismiss()
-//
+           // val signature = mSig.getBitmap()
+           // signatureCapture!!.setImageBitmap(signature)
+           // signatureCapturetrans!!.setImageBitmap(signature)
+           // signatureString = ImageUtil.convertBimaptoBase64(signature)
+
 //            if(signatureString.isNotEmpty() || imageString!!.isNotEmpty()){
 //                spinnertxt_dialog = "OC"
 //                packStatusStr = "Picked" // todo
@@ -613,7 +634,7 @@ class TransferInAddActivity : BaseActivity() {
         btnClose.setOnClickListener {
             mPhotoFile = null
             imageView.setImageDrawable(null)
-
+            imageString = ""
             uploadImgDialog_txt?.tag = ""
             uploadImgDialog_txt?.text = "Upload Image"
 
@@ -856,6 +877,7 @@ class TransferInAddActivity : BaseActivity() {
         acceptButton.setOnClickListener { // byte[] signature = captureSignatureView.getBytes();
             val signature = mSig.getBitmap()
             signatureCapture!!.setImageBitmap(signature)
+            signatureCapturetrans!!.setImageBitmap(signature)
             signatureString = ImageUtil.convertBimaptoBase64(signature)
             Utils.setSignature(signatureString)
             signatureAlert!!.dismiss()
@@ -978,6 +1000,8 @@ class TransferInAddActivity : BaseActivity() {
                                 intent.putExtra("transferType", transferType)
                             }
                             startActivity(intent)
+                            imageString = ""
+                            signatureString = ""
                             finish()
                         } else {
                             assert(responseData != null)

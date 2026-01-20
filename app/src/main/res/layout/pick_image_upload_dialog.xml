@@ -167,6 +167,7 @@
             android:padding="5dp"
             android:layout_alignParentRight="true"
             android:layout_margin="6dp"
+            android:visibility="gone"
             android:background="?attr/selectableItemBackgroundBorderless"
             app:tint="@color/red1" />
         </RelativeLayout>

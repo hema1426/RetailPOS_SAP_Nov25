@@ -357,6 +357,7 @@ class StockRequestAddActivity : BaseActivity() {
         val mContent = customLayout.findViewById<LinearLayout>(R.id.signature_layout)
         acceptButton.setEnabled(false)
         acceptButton.setAlpha(0.4f)
+        mContent.visibility = View.GONE
         val mSig = CaptureSignatureView(this@StockRequestAddActivity, null) {
             acceptButton.setEnabled(true)
             acceptButton.setAlpha(1f)
