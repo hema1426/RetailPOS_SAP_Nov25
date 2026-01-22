@@ -85,6 +85,12 @@
             android:screenOrientation="portrait"
             />
         <activity
+            android:name=".ui.newtransfer.TransferScanAddActivity"
+            android:exported="false"
+            android:theme="@style/AppTheme"
+            android:screenOrientation="portrait"
+            />
+        <activity
             android:name=".ui.activity.ConvertTransferAddActivity"
             android:exported="false"
             android:theme="@style/AppTheme"

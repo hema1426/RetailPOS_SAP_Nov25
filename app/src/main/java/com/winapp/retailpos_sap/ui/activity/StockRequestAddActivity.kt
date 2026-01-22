@@ -305,7 +305,10 @@ class StockRequestAddActivity : BaseActivity() {
             val copyPlus = customLayout.findViewById<Button>(R.id.increase)
             val copyMinus = customLayout.findViewById<Button>(R.id.decrease)
             val signatureButton = customLayout.findViewById<Button>(R.id.btn_signature)
+            val signatureLayout = customLayout.findViewById<LinearLayout>(R.id.signature_layout)
             signatureButton!!.visibility = View.GONE
+            signatureLayout!!.visibility = View.GONE
+
             val copyLayout = customLayout.findViewById<LinearLayout>(R.id.print_layout)
 
                 saveTitle!!.setText("Save Stock Request")

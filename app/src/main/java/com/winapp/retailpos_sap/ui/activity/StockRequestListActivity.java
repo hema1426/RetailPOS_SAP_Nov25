@@ -190,23 +190,36 @@ public class StockRequestListActivity extends NavigationActivity implements
                 }
             }
         });
-//        if (getIntent()!=null) {
-//            transferTypeList = getIntent().getStringExtra("transferTypelist");
-////            assert docNumber != null;
-//            if (transferTypeList != null && !transferTypeList.isEmpty()) {
-//                if(transferTypeList.equals("Receive")) {
-//                    getStockRequestList("In", currentDate, currentDate);
-//                    mode = "In";
-//                }else{
-//                    getStockRequestList("Out",currentDate,currentDate);
-//                    mode="Out";
-//                }
-//            }
-//            Log.w("transfertyplist",""+transferTypeList);
-//        }
+        if (getIntent()!=null) {
+            transferTypeList = getIntent().getStringExtra("transferTypelist");
+//            assert docNumber != null;
+            if (transferTypeList != null && !transferTypeList.isEmpty()) {
+                if(transferTypeList.equals("Receive")) {
+                    getStockRequestList("In", currentDate, currentDate);
+                    requestSentView.setVisibility(View.GONE);
+                    requestReceiveView.setVisibility(View.VISIBLE);
+                    mode="In";
+                    requestMode = "Receive";
 
-        getStockRequestList("In", currentDate, currentDate);
-        mode = "In";
+                }else{
+                    getStockRequestList("Out",currentDate,currentDate);
+                    requestSentView.setVisibility(View.VISIBLE);
+                    requestReceiveView.setVisibility(View.GONE);
+                    mode="Out";
+                    requestMode = "Sent";
+                }
+            }else{
+                getStockRequestList("In", currentDate, currentDate);
+                requestSentView.setVisibility(View.GONE);
+                requestReceiveView.setVisibility(View.VISIBLE);
+                mode="In";
+                requestMode = "Receive";
+            }
+            Log.w("transfertyplist",""+transferTypeList);
+        }
+
+//        getStockRequestList("In", currentDate, currentDate);
+//        mode = "In";
 
         requestSentLayout.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
@@ -654,7 +667,9 @@ public class StockRequestListActivity extends NavigationActivity implements
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        finish();
+       // finish();
+        Intent intent=new Intent(StockRequestListActivity.this, NavigationActivity.class);
+        startActivity(intent);
     }
 
     public void showPopupMenu(TransferModel transferModels ,View view) {

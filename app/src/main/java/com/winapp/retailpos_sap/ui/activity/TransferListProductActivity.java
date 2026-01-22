@@ -39,6 +39,7 @@ import com.winapp.retailpos_sap.ui.db.DBHelper;
 import com.winapp.retailpos_sap.ui.model.TransferDetailModel;
 import com.winapp.retailpos_sap.ui.model.TransferModel;
 import com.winapp.retailpos_sap.ui.newtransfer.TransferInAddActivity;
+import com.winapp.retailpos_sap.ui.newtransfer.TransferScanAddActivity;
 import com.winapp.retailpos_sap.ui.utils.Constants;
 import com.winapp.retailpos_sap.ui.utils.SessionManager;
 import com.winapp.retailpos_sap.ui.utils.Utils;
@@ -91,7 +92,7 @@ public class TransferListProductActivity extends NavigationActivity implements V
     HashMap<String, String> user;
     SessionManager session;
     View searchFilterView;
-
+    public String transferTypeList = "Transfer In";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -148,7 +149,44 @@ public class TransferListProductActivity extends NavigationActivity implements V
         //   addTransfer.setVisibility(View.GONE);
         //    transferInButton.setEnabled(false);
         //    transferInText.setEnabled(false);
-        getTransferInRequest("In", currentDate, currentDate);
+        if (getIntent()!=null) {
+            transferTypeList = getIntent().getStringExtra("transferTypelist");
+//            assert docNumber != null;
+            if (transferTypeList != null && !transferTypeList.isEmpty()) {
+                if(transferTypeList.equals("Transfer In")) {
+                    transferMode = "Transfer In";
+                    mode = "In";
+                    // addTransfer.setVisibility(View.GONE);
+                    transferInButton.setBackgroundColor(Color.parseColor("#868e35"));
+                    transferInText.setTextColor(Color.parseColor("#FFFFFF"));
+                    transferOutButton.setBackgroundColor(Color.parseColor("#d3d3d3"));
+                    transferOutText.setTextColor(Color.parseColor("#212121"));
+                    getTransferInRequest("In", currentDate, currentDate);
+                }else{
+                    transferMode = "Transfer Out";
+                    mode = "Out";
+                    //addTransfer.setVisibility(View.VISIBLE);
+                    transferOutButton.setBackgroundColor(Color.parseColor("#868e35"));
+                    transferOutText.setTextColor(Color.parseColor("#FFFFFF"));
+                    transferInText.setTextColor(Color.parseColor("#212121"));
+                    transferInButton.setBackgroundColor(Color.parseColor("#d3d3d3"));
+                    getTransferInRequest("Out", currentDate, currentDate);
+
+                }
+            }else{
+                transferMode = "Transfer In";
+                mode = "In";
+                // addTransfer.setVisibility(View.GONE);
+                transferInButton.setEnabled(false);
+                transferOutButton.setEnabled(true);
+                transferInText.setEnabled(false);
+                transferOutText.setEnabled(true);
+                getTransferInRequest("In", currentDate, currentDate);
+            }
+            Log.w("transfertyplist",""+transferTypeList);
+        }
+
+
 
         if (getIntent() != null) {
             String docNumber = getIntent().getStringExtra("docNum");
@@ -167,12 +205,9 @@ public class TransferListProductActivity extends NavigationActivity implements V
         transferSearchText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
-
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-
             }
 
             @Override
@@ -599,7 +634,7 @@ public class TransferListProductActivity extends NavigationActivity implements V
             //intent.putExtra("transferType",transferType);
             // startActivity(intent);
 
-            Intent intent = new Intent(getApplicationContext(), TransferInAddActivity.class);
+            Intent intent = new Intent(getApplicationContext(), TransferScanAddActivity.class);
             intent.putExtra("transferType", transferType);
             startActivity(intent);
         } else if (item.getItemId() == R.id.action_filter) {
@@ -621,6 +656,8 @@ public class TransferListProductActivity extends NavigationActivity implements V
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        finish();
+       // finish();
+        Intent intent=new Intent(TransferListProductActivity.this, NavigationActivity.class);
+        startActivity(intent);
     }
 }

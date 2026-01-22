@@ -23,7 +23,6 @@ public class Constants extends BaseApp {
     //SQL
      public static String BASEURL = "http://158.140.143.87:83/api/";
 
-
     //HANA
  //   public static String BASEURL = "http://158.140.143.87:96/api/";
 

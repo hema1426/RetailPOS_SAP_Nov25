@@ -129,7 +129,7 @@ class ConvertTransferAddActivity : BaseActivity() {
         if (intent != null) {
             stockReqNo = intent.getStringExtra("convertTranferNo")
             request_no_convertl!!.setText(stockReqNo);
-            setTitle("Convert To Transfer")
+            setTitle("Convert To Transfer Draft")
         }
         getStockRequestDetails(stockReqNo!!)
     }
@@ -138,8 +138,8 @@ class ConvertTransferAddActivity : BaseActivity() {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             var count = 0
             for (i in transferDetailsList!!.indices) {
-                if (!transferDetailsList!![i].qty.isEmpty()) {
-                    count += transferDetailsList!![i].qty.toDouble().toInt()
+                if (!transferDetailsList!![i].sentQty.isEmpty()) {
+                    count += transferDetailsList!![i].sentQty.toDouble().toInt()
                 }
             }
             if (count > 0) {
@@ -248,6 +248,9 @@ class ConvertTransferAddActivity : BaseActivity() {
             val copyMinus = customLayout.findViewById<Button>(R.id.decrease)
             val signatureButton = customLayout.findViewById<Button>(R.id.btn_signature)
             val copyLayout = customLayout.findViewById<LinearLayout>(R.id.print_layout)
+            val signatureLayout = customLayout.findViewById<LinearLayout>(R.id.signature_layout)
+            signatureButton!!.visibility = View.GONE
+            signatureLayout!!.visibility = View.GONE
 
                 saveTitle!!.setText("Save Transfer")
                 saveMessage!!.setText("Are you sure want to save Transfer?")
@@ -335,9 +338,9 @@ class ConvertTransferAddActivity : BaseActivity() {
         var itemsObject = JSONObject()
         val itemsArray = JSONArray()
 
-        rootJson.put("ReqDocNum", "")
-        rootJson.put("FromWhsCode", reqFromLoc)
-        rootJson.put("ToWhsCode", reqToLoc)
+        rootJson.put("ReqDocNum", stockReqNo)
+        rootJson.put("FromWhsCode", locationCode)
+        rootJson.put("ToWhsCode", reqFromLoc)
         rootJson.put("DocDate", currentDate)
         rootJson.put("DocDueDate", currentDate)
         rootJson.put("User", username)
@@ -351,8 +354,10 @@ class ConvertTransferAddActivity : BaseActivity() {
                 itemsObject.put("ItemCode", model.itemCode)
                 itemsObject.put("ItemName", model.description)
                 itemsObject.put("Qty", model.sentQty.toString())
-                itemsObject.put("FromWhsCode", reqFromLoc)
-                itemsObject.put("ToWhsCode", reqToLoc)
+//                itemsObject.put("FromWhsCode", reqFromLoc)
+//                itemsObject.put("ToWhsCode", reqToLoc)
+                itemsObject.put("FromWhsCode", locationCode) // said yasin
+                itemsObject.put("ToWhsCode", reqFromLoc)
                 itemsObject.put("UomCode", "PCS")
                 itemsObject.put("BatchNum", "")
                 itemsObject.put("SerialNum", "")
@@ -958,8 +963,8 @@ override fun onOptionsItemSelected(item: MenuItem): Boolean {
     if (item.itemId == android.R.id.home) { //finish();
         var count = 0
         for (i in transferDetailsList!!.indices) {
-            if (!transferDetailsList!![i].qty.isEmpty()) {
-                count += transferDetailsList!![i].qty.toDouble().toInt()
+            if (!transferDetailsList!![i].sentQty.isEmpty()) {
+                count += transferDetailsList!![i].sentQty.toDouble().toInt()
             }
         }
         if (count > 0) {
@@ -969,8 +974,8 @@ override fun onOptionsItemSelected(item: MenuItem): Boolean {
         }
     } else if (item.itemId == R.id.action_save1) {
         for (i in transferDetailsList!!.indices) {
-            if (transferDetailsList!![i].qty.isNotEmpty()) {
-                val qty = transferDetailsList!![i].qty.toDouble().toInt()
+            if (transferDetailsList!![i].sentQty.isNotEmpty()) {
+                val qty = transferDetailsList!![i].sentQty.toDouble().toInt()
                 count += qty
             }
         }

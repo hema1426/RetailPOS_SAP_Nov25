@@ -2,6 +2,7 @@ package com.winapp.retailpos_sap.ui.newtransfer
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.app.ProgressDialog
 import android.content.DialogInterface
 import android.content.Intent
@@ -22,17 +23,17 @@ import android.util.Base64
 import android.util.Log
 import android.view.Gravity
 import android.view.KeyEvent
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.AdapterView
+import android.view.WindowManager
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import android.widget.Toolbar
@@ -68,7 +69,6 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import com.winapp.retailpos_sap.BuildConfig
 import com.winapp.retailpos_sap.R
 import com.winapp.retailpos_sap.ui.activity.BaseActivity
-import com.winapp.retailpos_sap.ui.activity.StockRequestAddActivity
 import com.winapp.retailpos_sap.ui.activity.StockRequestListActivity
 import com.winapp.retailpos_sap.ui.activity.TransferListProductActivity
 import com.winapp.retailpos_sap.ui.model.ItemGroupList
@@ -92,18 +92,22 @@ import java.util.Date
 import java.util.Locale
 import java.util.Objects
 
-class TransferInAddActivity : BaseActivity() {
+class TransferScanAddActivity : BaseActivity() {
     var pDialog: SweetAlertDialog? = null
     private var transferInModels: ArrayList<TransferInModel>? = null
-    private var transferInDetailsl: ArrayList<TransferInDetails>? = null
+    private var transferInDetailsList = ArrayList<TransferInDetails>()
+    private var transferSearchList = ArrayList<TransferInDetails>()
     private var locationDetailsl: ArrayList<LocationDetails>? = null
-    var transferInAdapter: TransferInAdapter? = null
-    var linerLayoutManager: LinearLayoutManager? = null
+    private lateinit var transferAddAdapter: TransferAddScanAdapter
+    private lateinit var transferAddSearchAdapter: TransferAddSearchAdapter
+    private lateinit var linerLayoutManager: LinearLayoutManager
     var transferInView: RecyclerView? = null
     var pdtsizel: TextView? = null
     var fromlocationl: TextView? = null
     var tolocationl: TextView? = null
     var toolbar: Toolbar? = null
+    var rv_transferSearch: RecyclerView? = null
+    var pdtTxtl: TextView? = null
 
     //    public LinearLayout toolbarImglay;
     //    public ImageView saveImg;
@@ -129,6 +133,7 @@ class TransferInAddActivity : BaseActivity() {
     private var alert: AlertDialog? = null
     var invoicePrintCheck: CheckBox? = null
     var uploadImgDialog_txt: TextView? = null
+    var barcodetxt_transfl: TextView? = null
     var mPhotoFile: File? = null
     var mCompressor: FileCompressor? = null
 
@@ -157,7 +162,7 @@ class TransferInAddActivity : BaseActivity() {
     @RequiresApi(api = Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_transfer_in)
+        setContentView(R.layout.activity_transfer_scan_add)
         Log.w("activity_cg", javaClass.getSimpleName().toString())
         session = SessionManager(this)
         user = session!!.getUserDetails()
@@ -184,13 +189,14 @@ class TransferInAddActivity : BaseActivity() {
         emptytxt = findViewById(R.id.empty_txt)
         pdtsizel = findViewById(R.id.pdtsize)
         groupspinner = findViewById(R.id.spinner_status)
+        barcodetxt_transfl = findViewById(R.id.barcodetxt_transf)
         //        toolbar= findViewById(R.id.toolbar_trans);
 
 //        saveImg= findViewById(R.id.save_image);
 //        toolbarImglay= findViewById(R.id.iv_customtoolbar_img);
 //        toolbartxt= findViewById(R.id.tv_customtoolbar_title);
+
         default_uom_transfl!!.setText(settingUOMval)
-        transferInDetailsl = ArrayList()
         val c = Calendar.getInstance().time
         println("Current time => $c")
         val df1 = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
@@ -228,49 +234,19 @@ class TransferInAddActivity : BaseActivity() {
                 }
             }
         }
+        transferInDetailsList = ArrayList()
+        transferSearchList = ArrayList()
 
-//        toolbarImglay.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                int count=0;
-//                for(int i = 0; i<transferInDetailsl.size(); i++){
-//                    if(!transferInDetailsl.get(i).getQty().isEmpty()){
-//                        count+=Integer.parseInt(transferInDetailsl.get(i).getQty());
-//                    }
-//                }
-//                if (count>0){
-//                    showDeleteAlert();
-//                }else {
-//                    finish();
-//                }
-//            }
-//        });
+        linerLayoutManager = LinearLayoutManager(this)
+        transferInView!!.layoutManager = linerLayoutManager
 
-//        saveImg.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                for(int i = 0; i<transferInDetailsl.size(); i++){
-//                    if(!transferInDetailsl.get(i).getQty().isEmpty()){
-//                        count+=Integer.parseInt(transferInDetailsl.get(i).getQty());
-//                    }
-//                }
-//                Log.e("qqty",""+count);
-//                if (fromWarehouseCode!=null && toWarehouseCode!=null && !toWarehouseCode.isEmpty() &&
-//                        !fromWarehouseCode.isEmpty()){
-//                    if (count > 0){
-//                        try {
-//                            showSaveAlert(transferType);
-//                        } catch (Exception e) {
-//                            e.printStackTrace();
-//                        }
-//                    }else {
-//                        Toast.makeText(getApplicationContext(),"Add product first...!",Toast.LENGTH_SHORT).show();
-//                    }
-//                }else {
-//                    Toast.makeText(getApplicationContext(),"Select Locations...!",Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//        });
+        transferAddAdapter = TransferAddScanAdapter(
+            this,
+            transferInDetailsList,
+            transferType!!
+        )
+        transferInView!!.adapter = transferAddAdapter
+
         fromlocationlay!!.setOnClickListener(View.OnClickListener {
             getfromlocationDialog(
                 locationDetailsl
@@ -280,11 +256,15 @@ class TransferInAddActivity : BaseActivity() {
             if (!fromWarehouseCode!!.isEmpty() && fromWarehouseCode != null) {
                 gettolocationDialog(locationDetailsl)
             } else {
-                Toast.makeText(this@TransferInAddActivity, "Select from location", Toast.LENGTH_SHORT)
+                Toast.makeText(
+                    this@TransferScanAddActivity,
+                    "Select from location",
+                    Toast.LENGTH_SHORT
+                )
                     .show()
             }
         })
-        if (transferInDetailsl == null) {
+        if (transferInDetailsList == null) {
             emptytxt!!.setVisibility(View.VISIBLE)
             pdtsizel!!.setVisibility(View.GONE)
             search_ed!!.setEnabled(false)
@@ -308,8 +288,8 @@ class TransferInAddActivity : BaseActivity() {
 //                    }
                     //  Log.w("transFiltSize",""+transferInDetailsl.size());
                 } else {
-                    Log.w("transFiltSizeaa", "" + transferInDetailsl!!.size)
-                    setTransferInAdapter(transferInDetailsl!!)
+                    Log.w("transFiltSizeaa", "" + transferInDetailsList!!.size)
+                    setTransferInAdapter(transferInDetailsList!!)
                 }
             }
 
@@ -321,9 +301,9 @@ class TransferInAddActivity : BaseActivity() {
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             var count = 0
-            for (i in transferInDetailsl!!.indices) {
-                if (!transferInDetailsl!![i].qty.isEmpty()) {
-                    count += transferInDetailsl!![i].qty.toInt()
+            for (i in transferInDetailsList!!.indices) {
+                if (!transferInDetailsList!![i].qty.isEmpty()) {
+                    count += transferInDetailsList!![i].qty.toInt()
                 }
             }
             if (count > 0) {
@@ -340,7 +320,7 @@ class TransferInAddActivity : BaseActivity() {
     }
 
     fun showDeleteAlert() {
-        val builder1 = AlertDialog.Builder(this@TransferInAddActivity)
+        val builder1 = AlertDialog.Builder(this@TransferScanAddActivity)
         builder1.setMessage("Data Will be Cleared are you sure want to back?")
         builder1.setCancelable(false)
         builder1.setPositiveButton(
@@ -364,8 +344,9 @@ class TransferInAddActivity : BaseActivity() {
             search_ed!!.setEnabled(true)
             emptytxt!!.visibility = View.GONE
             pdtsizel!!.text = transferInList.size.toString() + " Products"
-            transferInAdapter =
-                TransferInAdapter(applicationContext, transferInList, transferType!!)
+
+            transferAddAdapter =
+                TransferAddScanAdapter(applicationContext, transferInList, transferType!!)
             linerLayoutManager =
                 LinearLayoutManager(
                     applicationContext,
@@ -376,14 +357,15 @@ class TransferInAddActivity : BaseActivity() {
                 linerLayoutManager
             )
             transferInView!!.setItemAnimator(DefaultItemAnimator())
-            transferInView!!.setAdapter(transferInAdapter)
-            transferInAdapter!!.notifyDataSetChanged()
+            transferInView!!.setAdapter(transferAddAdapter)
+            transferAddAdapter!!.notifyDataSetChanged()
             //categoriesView.setVisibility(View.VISIBLE);
             //emptyLayout.setVisibility(View.GONE);
         } catch (ex: Exception) {
             Log.e("TAG", "Error in Populating the data:" + ex.message)
         }
     }
+
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == RESULT_OK) {
@@ -509,8 +491,9 @@ class TransferInAddActivity : BaseActivity() {
         } catch (exception: Exception) {
         }
     }
+
     fun showUploadImageAlert() {
-        val alertDialog = AlertDialog.Builder(this@TransferInAddActivity)
+        val alertDialog = AlertDialog.Builder(this@TransferScanAddActivity)
         val customLayout: View = layoutInflater.inflate(R.layout.pick_image_upload_dialog, null)
         alertDialog.setView(customLayout)
         uploadImgDialogLay = customLayout.findViewById<LinearLayout>(R.id.attachement_layout_inv)
@@ -523,8 +506,8 @@ class TransferInAddActivity : BaseActivity() {
         val closeButton = customLayout.findViewById<ImageView>(R.id.btnCloseSignature)
         val mContent = customLayout.findViewById<LinearLayout>(R.id.signature_layout)
 
-        val mSig = CaptureSignatureView(this@TransferInAddActivity, null)
-         //mContent.addView(mSig, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        val mSig = CaptureSignatureView(this@TransferScanAddActivity, null)
+        //mContent.addView(mSig, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
         invNo_txt.text = transferType
 //        Log.w("pickmodelaa:", pickModel.code!!)
 
@@ -552,7 +535,7 @@ class TransferInAddActivity : BaseActivity() {
             Utils.setSignature("")
             signatureCapture?.setImageDrawable(null)
             signatureCapturetrans?.setImageDrawable(null)
-           // mSig.ClearCanvas()
+            // mSig.ClearCanvas()
             signatureAlert?.dismiss()
         }
 
@@ -565,55 +548,6 @@ class TransferInAddActivity : BaseActivity() {
 
         submit_imgl.setOnClickListener {
             alertUpload!!.dismiss()
-           // val signature = mSig.getBitmap()
-           // signatureCapture!!.setImageBitmap(signature)
-           // signatureCapturetrans!!.setImageBitmap(signature)
-           // signatureString = ImageUtil.convertBimaptoBase64(signature)
-
-//            if(signatureString.isNotEmpty() || imageString!!.isNotEmpty()){
-//                spinnertxt_dialog = "OC"
-//                packStatusStr = "Picked" // todo
-//
-//                val sdf = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
-//                val currentDateandTime = sdf.format(Date())
-//                currentSaveDateTime = currentDateandTime
-//
-//                try {
-//                    val obj = JSONObject()
-//                    obj.put("invoiceNumber", invoiceNumber)
-//                    obj.put("currentDateTime", currentSaveDateTime)
-//                    obj.put("customerCode", custCode)
-//                    obj.put("Username", username)
-//                    obj.put("status", spinnertxt_dialog)
-//                    obj.put("PackStatus", packStatusStr)
-//                    obj.put("Remark", "")
-//                    obj.put("latitude", current_latitude)
-//                    obj.put("longitude", current_longitude)
-//                    obj.put("CurrentAddress", current_addr)
-//                    obj.put("SendMail", "")
-//                    obj.put("image", imageString)
-//                    obj.put("signature", signatureString)
-//
-//                    Log.w("imgSign_","$obj")
-//
-//                    savePicklistDeliveryApi(obj,null,"false")
-//                } catch (e: JSONException) {
-//                    throw RuntimeException(e)
-//                }
-//            }else{
-//                Toast.makeText(applicationContext,  "Choose any one of the option !", Toast.LENGTH_SHORT).show()
-
-//                if (spinner_pickStatus!!.selectedItem.equals("Picked")) {
-//                    spinnertxt_dialog = "OC"
-//                } else  {
-//                    spinnertxt_dialog = "O"
-//                }
-                // //  spinnertxt_dialog = "OC"
-//}
-//            {"invoiceNumber":"18","currentDateTime":"20250616_171118","customerCode":"0005","Username":"ST01",
-//            "status":"C",
-//                "latitude":"10.96440894","longitude":"78.44143506","image":"","signature":""}
-
         }
         alertUpload = alertDialog.create()
         alertUpload!!.setCanceledOnTouchOutside(false)
@@ -621,7 +555,7 @@ class TransferInAddActivity : BaseActivity() {
     }
 
     fun showImage() {
-        val builder = AlertDialog.Builder(this@TransferInAddActivity)
+        val builder = AlertDialog.Builder(this@TransferScanAddActivity)
         val inflater = layoutInflater
         val dialogView = inflater.inflate(R.layout.image_view_layout, null)
         val imageView = dialogView.findViewById<ImageView>(R.id.invoice_image)
@@ -648,7 +582,7 @@ class TransferInAddActivity : BaseActivity() {
                 override fun onLoadFailed(
                     e: GlideException?,
                     model: Any,
-                    target: com.bumptech.glide.request.target.Target<Drawable?>,
+                    target: Target<Drawable?>,
                     isFirstResource: Boolean
                 ): Boolean {
                     return false
@@ -677,22 +611,6 @@ class TransferInAddActivity : BaseActivity() {
         }
 
         dialog.show()
-
-//        builder.setCancelable(false)
-//        builder.setTitle("Invoice Image")
-//        builder.setView(dialogView)
-//
-//        builder.setNeutralButton(
-//            "NEW IMAGE"
-//        ) { dialogInterface, i ->
-//            selectImage() }
-//        builder.setPositiveButton(
-//            "OK"
-//        ) { dialog, which ->
-//            uploadImgDialog_txt!!.setTag("view_image")
-//            uploadImgDialog_txt!!.setText("View Image")
-//            dialog.dismiss()
-//        }.create().show()
     }
 
     fun selectImage() {
@@ -700,7 +618,7 @@ class TransferInAddActivity : BaseActivity() {
             "Take Photo",  /* "Choose from Library",*/
             "Cancel"
         )
-        val builder = AlertDialog.Builder(this@TransferInAddActivity)
+        val builder = AlertDialog.Builder(this@TransferScanAddActivity)
         builder.setItems(
             items
         ) { dialog: DialogInterface, item: Int ->
@@ -713,6 +631,7 @@ class TransferInAddActivity : BaseActivity() {
         }
         builder.show()
     }
+
     fun getRealPathFromUri(contentUri: Uri?): String? {
         var cursor: Cursor? = null
         return try {
@@ -793,7 +712,7 @@ class TransferInAddActivity : BaseActivity() {
                     photoFile
                 )
                 mPhotoFile = photoFile
-                Log.w("uploadImgpic",""+mPhotoFile);
+                Log.w("uploadImgpic", "" + mPhotoFile);
 
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO)
@@ -812,17 +731,20 @@ class TransferInAddActivity : BaseActivity() {
         pickPhoto.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         startActivityForResult(pickPhoto, REQUEST_GALLERY_PHOTO)
     }
-    private fun switchColor(switchPicklist: SwitchCompat?,checked: Boolean) {
+
+    private fun switchColor(switchPicklist: SwitchCompat?, checked: Boolean) {
         switchPicklist!!.getThumbDrawable().setColorFilter(
             if (checked) Color.BLACK
             else Color.parseColor("#F95B24"),
-            PorterDuff.Mode.MULTIPLY)
+            PorterDuff.Mode.MULTIPLY
+        )
         switchPicklist!!.getTrackDrawable().setColorFilter(
             if (!checked) Color.BLACK
             else Color.parseColor("#F95B24"),
             PorterDuff.Mode.MULTIPLY
         )
     }
+
     @Throws(IOException::class)
     private fun createImageFile(): File {
         // Create an image file name
@@ -848,12 +770,14 @@ class TransferInAddActivity : BaseActivity() {
         ) { dialog: DialogInterface, which: Int -> dialog.cancel() }
         builder.show()
     }
+
     private fun openSettings() {
         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
         val uri = Uri.fromParts("package", packageName, null)
         intent.setData(uri)
         startActivityForResult(intent, 101)
     }
+
     fun showSignatureAlert() {
         val alertDialog = AlertDialog.Builder(this)
         val customLayout = layoutInflater.inflate(R.layout.signature_layout, null)
@@ -865,7 +789,7 @@ class TransferInAddActivity : BaseActivity() {
         val mContent = customLayout.findViewById<LinearLayout>(R.id.signature_layout)
         acceptButton.setEnabled(false)
         acceptButton.setAlpha(0.4f)
-        val mSig = CaptureSignatureView(this@TransferInAddActivity, null) {
+        val mSig = CaptureSignatureView(this@TransferScanAddActivity, null) {
             acceptButton.setEnabled(true)
             acceptButton.setAlpha(1f)
         }
@@ -919,7 +843,7 @@ class TransferInAddActivity : BaseActivity() {
 
         // Sales Details Add to the Objects
         var index = 1
-        for (model in transferInDetailsl!!) {
+        for (model in transferInDetailsList!!) {
             if (model.qty != null && !model.qty.isEmpty() && model.qty.toInt() > 0) {
                 Log.w("transFerQtyaa", "" + model.qty)
                 itemsObject = JSONObject()
@@ -956,7 +880,7 @@ class TransferInAddActivity : BaseActivity() {
 
     fun saveTransferOrRequest(jsonBody: JSONObject, copy: Int, transferType: String?) {
         try {
-            pDialog = SweetAlertDialog(this@TransferInAddActivity, SweetAlertDialog.PROGRESS_TYPE)
+            pDialog = SweetAlertDialog(this@TransferScanAddActivity, SweetAlertDialog.PROGRESS_TYPE)
             pDialog!!.progressHelper.setBarColor(Color.parseColor("#A5DC86"))
             pDialog!!.setCancelable(false)
             val requestQueue = Volley.newRequestQueue(this)
@@ -985,7 +909,8 @@ class TransferInAddActivity : BaseActivity() {
                     responseData = response.optJSONObject("responseData")
                     if (statusCode == "1") {
                         if (transferType == "Transfer In" || transferType == "Transfer Out"
-                            || transferType == "Covert Transfer") {
+                            || transferType == "Covert Transfer"
+                        ) {
                             assert(responseData != null)
                             val docNum = responseData.optString("docNum")
                             Toast.makeText(
@@ -1002,8 +927,8 @@ class TransferInAddActivity : BaseActivity() {
                             intent.putExtra("docNumlist", docNum)
                             intent.putExtra("transferTypelist", transferType)
                             startActivity(intent)
-                            imageString = ""
-                            signatureString = ""
+
+                            clearFun()
                             finish()
                         } else {
                             assert(responseData != null)
@@ -1090,6 +1015,13 @@ class TransferInAddActivity : BaseActivity() {
         }
     }
 
+    fun clearFun() {
+        imageString = ""
+        signatureString = ""
+        fromWarehouseCode = ""
+        toWarehouseCode = ""
+    }
+
     private fun filter(text: String) {
         try {
             //new array list that will hold the filtered data
@@ -1097,7 +1029,7 @@ class TransferInAddActivity : BaseActivity() {
             //looping through existing elements
             //   for (ProductsModel s : selectProductAdapter.getProductsList()) {
             emptytxt!!.visibility = View.GONE
-            for (s in transferInDetailsl!!) {
+            for (s in transferInDetailsList!!) {
                 //if the existing elements contains the search input
                 if (s.productName.lowercase(Locale.getDefault())
                         .contains(text.lowercase(Locale.getDefault())) ||
@@ -1110,7 +1042,7 @@ class TransferInAddActivity : BaseActivity() {
                 }
             }
             //calling a method of the adapter class and passing the filtered list
-            transferInAdapter!!.updateList(filterProducts)
+            transferAddAdapter!!.updateList(filterProducts)
             Log.e("filter", "" + filterProducts)
             if (filterProducts.isEmpty()) {
                 emptytxt!!.visibility = View.VISIBLE
@@ -1123,28 +1055,20 @@ class TransferInAddActivity : BaseActivity() {
         }
     }
 
-    //    void filter(String text){
-    //        ArrayList<TransferInModel.TransferInDetails> temp = new ArrayList<>();
-    //        for(TransferInModel.TransferInDetails d: transferInDetailsl){
-    //
-    //            String item = d.toString().toLowerCase();
-    //            if(item.contains(text)){
-    //                temp.add(d);
-    //                Log.e("temp",""+temp);
-    //            }
-    //        }
-    //        //update recyclerview
-    //        transferInAdapter.updateList(temp);
-    //    }
     @RequiresApi(api = Build.VERSION_CODES.M)
-    private fun getTransferIn(warehouseCode: String?, itemGroupCode: String) {
+    private fun getProductListtransfer(
+        warehouseCode: String?, itemGroupCode: String, barcode: String, productSearch: String
+    ) {
         val url: String
         try {
             val jsonObj = JSONObject()
             jsonObj.put("WarehouseCode", warehouseCode)
             jsonObj.put("ItemGroupCode", itemGroupCode)
+            jsonObj.put("Barcode", barcode)
+            jsonObj.put("Product", productSearch)
+
             val requestQueue = Volley.newRequestQueue(this)
-            url = Constants.BASEURL + "ProductList"
+            url = Constants.BASEURL + "ProductListByBarcode"
             Log.w("pdtlist_urlTransAdd:", url + jsonObj)
             pDialog = SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE)
             pDialog!!.progressHelper.setBarColor(Color.parseColor("#A5DC86"))
@@ -1152,7 +1076,7 @@ class TransferInAddActivity : BaseActivity() {
             pDialog!!.setCancelable(false)
             pDialog!!.show()
             transferInModels = ArrayList()
-            transferInDetailsl = ArrayList()
+
             val jsonObjectRequest: JsonObjectRequest = object : JsonObjectRequest(
                 Method.POST,
                 url,
@@ -1169,45 +1093,31 @@ class TransferInAddActivity : BaseActivity() {
                             val transferInModel = TransferInModel()
                             val pdtArray = response.optJSONArray("responseData")
                             for (i in 0 until pdtArray.length()) {
+
                                 val jsonObject = pdtArray.getJSONObject(i)
-                                if (transferType == "Transfer In") {
-                                    if (jsonObject.optInt("stockInHand") > 0) {
-                                        val transferInDetails = TransferInDetails()
-                                        transferInDetails.productName =
-                                            jsonObject.optString("productName")
-                                        transferInDetails.productCode =
-                                            jsonObject.optString("productCode")
-                                        transferInDetails.stockInHand =
-                                            jsonObject.optInt("stockInHand")
-                                        transferInDetails.qty = ""
-                                        transferInDetails.inventoryUOM =
-                                            jsonObject.optString("defaultInventoryUOM")
-                                        transferInDetailsl!!.add(transferInDetails)
-                                    }
-                                } else {
-                                    val transferInDetails = TransferInDetails()
-                                    transferInDetails.productName =
-                                        jsonObject.optString("productName")
-                                    transferInDetails.productCode =
-                                        jsonObject.optString("productCode")
-                                    transferInDetails.stockInHand = jsonObject.optInt("stockInHand")
-                                    transferInDetails.qty = ""
-                                    transferInDetails.inventoryUOM =
-                                        jsonObject.optString("defaultInventoryUOM")
-                                    transferInDetailsl!!.add(transferInDetails)
+
+                                val newItem = TransferInDetails().apply {
+                                    productName = jsonObject.optString("productName")
+                                    productCode = jsonObject.optString("productCode")
+                                    stockInHand = jsonObject.optInt("stockInHand")
+                                    qty = ""
+                                    inventoryUOM = jsonObject.optString("defaultInventoryUOM")
                                 }
+
+                                addOrUpdateProduct(newItem)
                             }
-                            Log.w("entrTransddd", "" + transferInDetailsl!!.size)
-                            if (transferInDetailsl!!.size > 0) {
-                                transferInModel.transferInDetails = transferInDetailsl
-                                setTransferInAdapter(transferInDetailsl!!)
-                                Log.w("entrTrans", "" + transferInDetailsl!!.size)
-                            }
+
+                            Log.w("entrTransddd", "" + transferInDetailsList!!.size)
+//                            if (transferInDetailsl!!.size > 0) {
+//                                transferInModel.transferInDetails = transferInDetailsl
+//                                    // setTransferInAdapter(transferInDetailsl!!)
+//                                Log.w("entrTrans", "" + transferInDetailsl!!.size)
+//                            }
                         } else {
-                            transferInAdapter!!.notifyDataSetChanged()
-                            transferInDetailsl!!.clear()
-                            transferInView!!.setAdapter(null)
-                            pdtsizel!!.text = "0 Products"
+//                            transferAddAdapter!!.notifyDataSetChanged()
+//                            transferInDetailsList!!.clear()
+//                            transferInView!!.setAdapter(null)
+                            //  pdtsizel!!.text = "0 Products"
                             Toast.makeText(applicationContext, statusMessage, Toast.LENGTH_SHORT)
                                 .show()
                             Log.w("entrTransff", "")
@@ -1251,6 +1161,211 @@ class TransferInAddActivity : BaseActivity() {
         }
     }
 
+    private fun addOrUpdateProduct(newItem: TransferInDetails) {
+
+        val index = transferInDetailsList.indexOfFirst {
+            it.productCode == newItem.productCode
+        }
+
+        val focusPosition: Int
+// Product exists - just focus
+        if (index != -1) {
+            focusPosition = index
+        } else {
+            newItem.qty = ""
+            transferInDetailsList.add(0, newItem)
+            transferAddAdapter.notifyItemInserted(0)
+            focusPosition = 0
+        }
+
+        transferInView!!.visibility = View.VISIBLE
+        emptytxt!!.visibility = View.GONE
+        pdtsizel!!.visibility = View.VISIBLE
+        pdtsizel!!.text = "${transferInDetailsList.size} Products"
+
+        linerLayoutManager.scrollToPositionWithOffset(focusPosition, 0)
+        transferAddAdapter.focusOnItem(focusPosition, transferInView!!)
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    private fun getProductListSearch(
+        warehouseCode: String?, itemGroupCode: String, barcode: String, productSearch: String
+    ) {
+        val url: String
+        try {
+            val jsonObj = JSONObject()
+            jsonObj.put("WarehouseCode", warehouseCode)
+            jsonObj.put("ItemGroupCode", itemGroupCode)
+            jsonObj.put("Barcode", barcode)
+            jsonObj.put("Product", productSearch)
+
+            val requestQueue = Volley.newRequestQueue(this)
+            url = Constants.BASEURL + "ProductListByBarcode"
+            Log.w("pdtlist_urlTransAdd:", url + jsonObj)
+            pDialog = SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE)
+            pDialog!!.progressHelper.setBarColor(Color.parseColor("#A5DC86"))
+            pDialog!!.setTitleText("Loading...")
+            pDialog!!.setCancelable(false)
+            pDialog!!.show()
+
+            val jsonObjectRequest: JsonObjectRequest = object : JsonObjectRequest(
+                Method.POST,
+                url,
+                jsonObj,
+                Response.Listener { response: JSONObject ->
+                    try {
+                        pDialog!!.dismiss()
+                        Log.w("pdtlistTransAdd:", response.toString())
+
+                        //pDialog.dismiss();
+                        val statusCode = response.optString("statusCode")
+                        val statusMessage = response.optString("statusMessage")
+                        if (statusCode == "1") {
+                            val transferInModel = TransferInModel()
+                            val pdtArray = response.optJSONArray("responseData")
+                            transferSearchList = arrayListOf()
+                            for (i in 0 until pdtArray.length()) {
+
+                                val jsonObject = pdtArray.getJSONObject(i)
+
+                                val newItem = TransferInDetails().apply {
+                                    productName = jsonObject.optString("productName")
+                                    productCode = jsonObject.optString("productCode")
+                                    stockInHand = jsonObject.optInt("stockInHand")
+                                    qty = ""
+                                    inventoryUOM = jsonObject.optString("defaultInventoryUOM")
+                                }
+                                transferSearchList.add(newItem)
+                            }
+                            addOrUpdatePdtSearch(transferSearchList)
+
+
+                            Log.w("entrTransearc", "" + transferSearchList!!.size)
+//                            if (transferInDetailsl!!.size > 0) {
+//                                transferInModel.transferInDetails = transferInDetailsl
+//                                    // setTransferInAdapter(transferInDetailsl!!)
+//                                Log.w("entrTrans", "" + transferInDetailsl!!.size)
+//                            }
+                        } else {
+//                            transferAddAdapter!!.notifyDataSetChanged()
+//                            transferInDetailsList!!.clear()
+//                            transferInView!!.setAdapter(null)
+                            //  pdtsizel!!.text = "0 Products"
+                            Toast.makeText(applicationContext, statusMessage, Toast.LENGTH_SHORT)
+                                .show()
+                            Log.w("entrTransff", "")
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }, Response.ErrorListener { error: VolleyError ->
+                    // Do something when error occurred
+                    // pDialog.dismiss();
+                    Log.w("Error_throwing:", error.toString())
+                }) {
+                override fun getHeaders(): Map<String, String> {
+                    val params = HashMap<String, String>()
+                    val creds = String.format(
+                        "%s:%s",
+                        Constants.API_SECRET_CODE,
+                        Constants.API_SECRET_PASSWORD
+                    )
+                    val auth = "Basic " + Base64.encodeToString(creds.toByteArray(), Base64.DEFAULT)
+                    params["Authorization"] = auth
+                    return params
+                }
+            }
+            jsonObjectRequest.setRetryPolicy(object : RetryPolicy {
+                override fun getCurrentTimeout(): Int {
+                    return 50000
+                }
+
+                override fun getCurrentRetryCount(): Int {
+                    return 50000
+                }
+
+                @Throws(VolleyError::class)
+                override fun retry(error: VolleyError) {
+                }
+            })
+            // Add JsonArrayRequest to the RequestQueue
+            requestQueue.add(jsonObjectRequest)
+        } catch (e: Exception) {
+        }
+    }
+
+    private fun addOrUpdatePdtSearch(newItem: ArrayList<TransferInDetails>) {
+
+//        val index = transferSearchList.indexOfFirst {
+//            it.productCode == newItem.productCode
+//        }
+//
+//        val focusPosition: Int
+//
+//// Product exists - just focus
+//        if (index != -1) {
+//            focusPosition = index
+//        } else {
+
+        Log.d("cg_val:",""+newItem.size)
+        transferSearchList = arrayListOf()
+        transferSearchList.addAll(newItem) //.add(0, newItem)
+//        transferAddSearchAdapter.notifyDataSetChanged()
+
+        transferAddSearchAdapter = TransferAddSearchAdapter(
+            this,
+            transferSearchList,
+            transferType!!
+        )
+        rv_transferSearch!!.adapter = transferAddSearchAdapter
+
+
+        //focusPosition = 0
+//        }
+        linerLayoutManager.scrollToPositionWithOffset(0, 0)
+        //    transferAddAdapter.focusOnItem(focusPosition, transferInView!!)
+    }
+    private fun onSaveClicked(dialog: Dialog) {
+
+        val qtyEnteredList = transferSearchList.filter {
+            it.qty.isNotEmpty() && it.qty.toInt() > 0
+        }
+
+        if (qtyEnteredList.isEmpty()) {
+            Toast.makeText(this, "Please enter qty", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        mergeIntoMainAdapter(qtyEnteredList)
+        dialog.dismiss()
+            //   finish() //
+    }
+
+    private fun mergeIntoMainAdapter(newItems: List<TransferInDetails>) {
+
+        newItems.forEach { newItem ->
+
+            val index = transferInDetailsList.indexOfFirst {
+                it.productCode == newItem.productCode
+            }
+
+            if (index != -1) {
+                // Update qty only
+                transferInDetailsList[index].qty = newItem.qty
+                transferAddAdapter.notifyItemChanged(index)
+            } else {
+                // Add new item
+                transferInDetailsList.add(0, newItem)
+                transferAddAdapter.notifyItemInserted(0)
+            }
+        }
+
+        pdtsizel!!.text = "${transferInDetailsList.size} Products"
+        transferInView!!.visibility = View.VISIBLE
+        emptytxt!!.visibility = View.GONE
+
+        linerLayoutManager.scrollToPositionWithOffset(0, 0)
+    }
     @get:Throws(JSONException::class)
     private val locationlist: Unit
         private get() {
@@ -1347,13 +1462,13 @@ class TransferInAddActivity : BaseActivity() {
                 }
             }
             if (fromWarehouseCode != toWarehouseCode) {
-                getTransferIn(fromWarehouseCode, "All")
+                //getProductListtransfer(fromWarehouseCode, "All")
+                Toast.makeText(applicationContext, "Scan or search and get data !", Toast.LENGTH_SHORT).show()
                 dialog.dismiss()
             } else {
                 Toast.makeText(
                     applicationContext,
-                    "From warehouse and To warehouse should not be same...!",
-                    Toast.LENGTH_SHORT
+                    "From warehouse and To warehouse should not be same...!", Toast.LENGTH_SHORT
                 ).show()
             }
         }
@@ -1386,7 +1501,13 @@ class TransferInAddActivity : BaseActivity() {
                         }
                     }
                     if (fromWarehouseCode != toWarehouseCode) {
-                        getTransferIn(toWarehouseCode, "All")
+                        // getProductListtransfer(toWarehouseCode, "All")
+                        Toast.makeText(
+                            applicationContext,
+                            "Scan and get data !",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
                         dialog.dismiss()
                     } else {
                         Toast.makeText(
@@ -1405,7 +1526,7 @@ class TransferInAddActivity : BaseActivity() {
                     dialog.dismiss()
                 } else {
                     Toast.makeText(
-                        this@TransferInAddActivity,
+                        this@TransferScanAddActivity,
                         "From location & to location should not be same",
                         Toast.LENGTH_SHORT
                     ).show()
@@ -1417,97 +1538,78 @@ class TransferInAddActivity : BaseActivity() {
         builderSingle.show()
     }
 
-    @Throws(JSONException::class)
-    private fun getGrouplist(fromLocation: String): ArrayList<ItemGroupList> {
-        val requestQueue = Volley.newRequestQueue(this)
-        val url = Constants.BASEURL + "ItemGroupList"
-        // Initialize a new JsonArrayRequest instance
-        Log.w("Given_url_group:", url)
-        //        pDialog = new SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE);
-//        pDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
-//        pDialog.setTitleText("Loading Groups...");
-//        pDialog.setCancelable(false);
-//        pDialog.show();
-        itemGroup = ArrayList()
-        val jsonObjectRequest: JsonObjectRequest = object : JsonObjectRequest(
-            Method.GET,
-            url,
-            null,
-            Response.Listener { response: JSONObject ->
-                try {
-                    Log.w("grouplist:", response.toString())
-                    pDialog!!.dismiss()
-                    val statusCode = response.optString("statusCode")
-                    val statusMessage = response.optString("statusMessage")
-                    if (statusCode == "1") {
-                        val groupArray = response.optJSONArray("responseData")
-                        for (i in 0 until groupArray.length()) {
-                            val jsonObject = groupArray.getJSONObject(i)
-                            val groupName = jsonObject.getString("itemGroupName")
-                            val groupCode = jsonObject.getString("itemGroupCode")
-                            val itemGroupList = ItemGroupList(groupCode, groupName)
-                            itemGroup!!.add(itemGroupList)
-                        }
-                        if (itemGroup!!.size > 0) {
-                            setupGroup(itemGroup!!, fromLocation)
-                        }
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
+    private fun showTranSearch_Dialog() {
+
+        transferSearchList = ArrayList()
+
+        val batchLay: LinearLayout
+        val saveBtn: TextView
+        val closeBtn: LinearLayout
+        val searchEd: EditText
+        val searchLay: LinearLayout
+        val searchBtn: ImageView
+
+        val li = LayoutInflater.from(this)
+        val view: View = li.inflate(R.layout.transfer_search_dialog, null)
+
+        val alertDialogBuilder = AlertDialog.Builder(this)
+
+        rv_transferSearch = view.findViewById(R.id.rv_searchTransList)
+        saveBtn = view.findViewById(R.id.add_transferSearch)
+        closeBtn = view.findViewById(R.id.cancel_searchTrans)
+        pdtTxtl = view.findViewById(R.id.transfertypeSearch)
+        searchBtn = view.findViewById(R.id.search_transferBtn)
+        searchLay = view.findViewById(R.id.search_transferLay)
+        searchEd = view.findViewById(R.id.search_transEd)
+
+        pdtTxtl!!.setText(transferType)
+//todo
+        linerLayoutManager = LinearLayoutManager(this)
+        rv_transferSearch!!.layoutManager = linerLayoutManager
+
+        transferAddSearchAdapter = TransferAddSearchAdapter(
+            this,
+            transferSearchList,
+            transferType!!
+        )
+        rv_transferSearch!!.adapter = transferAddSearchAdapter
+
+        searchLay!!.setOnClickListener {
+            // transferSearchList = ArrayList()
+
+            if (searchEd.text.toString().isNotEmpty()) {
+                if (transferType == "Transfer In") {
+                    getProductListSearch(fromWarehouseCode, "All", "", searchEd.text.toString())
+                } else {
+                    getProductListSearch(toWarehouseCode, "All", "", searchEd.text.toString())
                 }
-            }, Response.ErrorListener { error: VolleyError ->
-                // Do something when error occurred
-                pDialog!!.dismiss()
-                Log.w("Error_throwing:", error.toString())
-            }) {
-            override fun getHeaders(): Map<String, String> {
-                val params = HashMap<String, String>()
-                val creds =
-                    String.format("%s:%s", Constants.API_SECRET_CODE, Constants.API_SECRET_PASSWORD)
-                val auth = "Basic " + Base64.encodeToString(creds.toByteArray(), Base64.DEFAULT)
-                params["Authorization"] = auth
-                return params
+            } else {
+                Toast.makeText(this, "Enter Product Detail", Toast.LENGTH_SHORT).show()
             }
         }
-        jsonObjectRequest.setRetryPolicy(object : RetryPolicy {
-            override fun getCurrentTimeout(): Int {
-                return 50000
-            }
 
-            override fun getCurrentRetryCount(): Int {
-                return 50000
-            }
+        alertDialogBuilder.setView(view)
+        val dialog: Dialog = alertDialogBuilder.create()
+        dialog.setCancelable(true)
+        dialog.show()
 
-            @Throws(VolleyError::class)
-            override fun retry(error: VolleyError) {
-            }
-        })
-        // Add JsonArrayRequest to the RequestQueue
-        requestQueue.add(jsonObjectRequest)
-        return itemGroup!!
-    }
+        dialog.window!!
+            .clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
+        dialog.window!!
+            .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+        //  dialog.window!!.setLayout(1000, 1500)
 
-    private fun setupGroup(itemGroupLists: ArrayList<ItemGroupList>, fromLocation: String) {
-        val myAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, itemGroupLists)
-        groupspinner!!.setAdapter(myAdapter)
-        groupspinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            @RequiresApi(api = Build.VERSION_CODES.M)
-            override fun onItemSelected(adapterView: AdapterView<*>?, view: View, i: Int, l: Long) {
-                val itemCode = itemGroup!![i].groupCode
-                val itemName = itemGroup!![i].groupName
-                Log.e("selectspinn", "" + itemName)
-                getTransferIn(fromLocation, itemCode)
-                //                try {
-//                    getLocationlist();
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                }
-            }
+        Log.w("pdtSearch", "")
 
-            override fun onNothingSelected(adapterView: AdapterView<*>?) {
-                return
-            }
+        closeBtn.setOnClickListener {
+            dialog.dismiss()
         }
+
+        saveBtn.setOnClickListener {
+            onSaveClicked(dialog)
+
+        }
+
     }
 
     fun scanBarTxt(barcode: String) {
@@ -1517,7 +1619,7 @@ class TransferInAddActivity : BaseActivity() {
 
         var isSearched = false
         var currentIndex = 0
-        for ((index, prod) in this.transferInDetailsl!!.withIndex()) {
+        for ((index, prod) in this.transferInDetailsList!!.withIndex()) {
             Log.e("picklss", "" + prod.productCode + "  $barcode")
 
             if (prod.productCode == barcode) {
@@ -1533,8 +1635,8 @@ class TransferInAddActivity : BaseActivity() {
 //                        transferInAdapter.let {
 //                            it!!.notifyDataSetChanged()
 //                        }
-                if (transferInAdapter != null) {
-                    transferInAdapter!!.updateQty(prod, true)
+                if (transferAddAdapter != null) {
+                    transferAddAdapter!!.updateQty(prod, true)
                     isSearched = true
                     currentIndex = index
 //                        break;
@@ -1570,166 +1672,205 @@ class TransferInAddActivity : BaseActivity() {
                     }
 //                }
 //                    transferInView!!.scrollToPosition(currentIndex)
-            }
+                }
 
-        }
-//                    if (prod.stockInHand <= prod.quantity) {
-//                        Toast.makeText(
-//                            this,
-//                            "Avaiable Stock : "+prod.stockInHand,
-//                            Toast.LENGTH_SHORT
-//                        )
-//                            .show()
-//                    }
-
-    }
-
-    if (!isscanpdt!!)
-    {
-        Log.e("pickbarco", "..")
-        Toast.makeText(this, "no product matched", Toast.LENGTH_SHORT).show()
-    }
-}
-
-fun scanFromFragment() {
-    fragmentLauncher.launch(ScanOptions())
-}
-
-private val fragmentLauncher: ActivityResultLauncher<ScanOptions> = registerForActivityResult(
-    ScanContract()
-) { result ->
-    if (result.contents == null) {
-        Toast.makeText(this@TransferInAddActivity, "No Product Found1", Toast.LENGTH_LONG)
-            .show()
-    } else {
-        val barcodeTxt = result.contents
-        //     barcodeText!!.setText(barcodeTxt)
-
-        val mp = MediaPlayer.create(this, R.raw.beep) // sound is inside res/raw/mysound
-        mp.start()
-        scanBarTxt(barcodeTxt)
-
-        Toast.makeText(
-            this@TransferInAddActivity,
-            "Product" + "${result.contents}",
-            Toast.LENGTH_LONG
-        ).show()
-
-        Log.e("scan_barcode.. ", "${result.contents}")
-
-    }
-}
-
-override fun dispatchKeyEvent(event: KeyEvent?): Boolean {
-    if (event != null && event.action == KeyEvent.ACTION_DOWN) {
-        val unicodeChar = event.unicodeChar
-        if (unicodeChar != 0) {
-            scannedData.append(unicodeChar.toChar())
-        }
-
-        // Check for ENTER / LINE FEED at end of scanning
-        if (event.keyCode == KeyEvent.KEYCODE_ENTER) {
-            val result = scannedData.toString()
-            scanBarTxt(result)
-            scannedData.clear()
-
-            // onScanCompleted(result) // Your handler
-            return true
-        }
-    }
-    return super.dispatchKeyEvent(event)
-}
-
-override fun onCreateOptionsMenu(menu: Menu): Boolean {
-    menuInflater.inflate(R.menu.transfer_add1_menu, menu)
-    return true
-}
-
-override fun onOptionsItemSelected(item: MenuItem): Boolean {
-    if (item.itemId == android.R.id.home) { //finish();
-        var count = 0
-        for (i in transferInDetailsl!!.indices) {
-            if (!transferInDetailsl!![i].qty.isEmpty()) {
-                count += transferInDetailsl!![i].qty.toInt()
             }
         }
-        if (count > 0) {
-            showDeleteAlert()
+
+        if (!isscanpdt!!) {
+            Log.e("pickbarco", "..")
+            Toast.makeText(this, "no product matched", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun scanFromFragment() {
+        fragmentLauncher.launch(ScanOptions())
+    }
+
+    private val fragmentLauncher: ActivityResultLauncher<ScanOptions> = registerForActivityResult(
+        ScanContract()
+    ) { result ->
+        if (result.contents == null) {
+            Toast.makeText(this@TransferScanAddActivity, "No Product Found1", Toast.LENGTH_LONG)
+                .show()
         } else {
-            onBackPressed()
+            val barcodeTxt = result.contents
+            barcodetxt_transfl!!.setText(barcodeTxt)
+
+            val mp = MediaPlayer.create(this, R.raw.beep) // sound is inside res/raw/mysound
+            mp.start()
+            // scanBarTxt(barcodeTxt)
+            if (transferType == "Transfer In") {
+                getProductListtransfer(fromWarehouseCode, "All", barcodeTxt, "")
+            } else {
+                getProductListtransfer(toWarehouseCode, "All", barcodeTxt, "")
+            }
+            Toast.makeText(
+                this@TransferScanAddActivity,
+                "Product" + "${result.contents}",
+                Toast.LENGTH_LONG
+            ).show()
+
+            Log.e("scan_barcode.. ", "${result.contents}")
+
         }
-    } else if (item.itemId == R.id.action_save1) {
-        for (i in transferInDetailsl!!.indices) {
-            if (transferInDetailsl!![i].qty.isNotEmpty()) {
-                count += transferInDetailsl!![i].qty.toInt()
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+
+        if (event.keyCode == KeyEvent.KEYCODE_ENTER) {
+            if (event.action == KeyEvent.ACTION_UP) {
+                var scanningTxt = barcodetxt_transfl!!.text.toString()
+
+                Toast.makeText(
+                    this,
+                    "BarCode Value... + " + barcodetxt_transfl!!.text.toString(),
+                    Toast.LENGTH_SHORT
+                ).show()
+                //scanBarTxt(scanningTxt)
+                if (transferType == "Transfer In") {
+                    getProductListtransfer(fromWarehouseCode, "All", scanningTxt, "")
+                } else {
+                    getProductListtransfer(toWarehouseCode, "All", scanningTxt, "")
+                }
+                Toast.makeText(
+                    this@TransferScanAddActivity,
+                    "Product" + "${scanningTxt}",
+                    Toast.LENGTH_LONG
+                ).show()
+                // getBarcodeValues(barcodeEdittext!!.text.toString().trim { it <= ' ' })
+                return true
             }
         }
-        Log.w("transiz_qty", "" + count)
-        Log.w("transsiz", "" + transferInDetailsl!!.size)
-        if (fromWarehouseCode != null && toWarehouseCode != null && !toWarehouseCode!!.isEmpty() &&
-            !fromWarehouseCode!!.isEmpty()
-        ) {
+        if (event.keyCode == KeyEvent.KEYCODE_BACK) {
+            // false;
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.transfer_scan_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) { //finish();
+            var count = 0
+            for (i in transferInDetailsList!!.indices) {
+                if (!transferInDetailsList!![i].qty.isEmpty()) {
+                    count += transferInDetailsList!![i].qty.toInt()
+                }
+            }
             if (count > 0) {
-                try {
-                    showSaveAlert(transferType)
-                } catch (e: Exception) {
-                    e.printStackTrace()
+                showDeleteAlert()
+            } else {
+                onBackPressed()
+            }
+        } else if (item.itemId == R.id.action_save1) {
+            for (i in transferInDetailsList!!.indices) {
+                if (transferInDetailsList!![i].qty.isNotEmpty()) {
+                    count += transferInDetailsList!![i].qty.toInt()
+                }
+            }
+            Log.w("transiz_qty", "" + count)
+            Log.w("transsiz", "" + transferInDetailsList!!.size)
+            if (fromWarehouseCode != null && toWarehouseCode != null && !toWarehouseCode!!.isEmpty() &&
+                !fromWarehouseCode!!.isEmpty()
+            ) {
+                if (count > 0) {
+                    try {
+                        showSaveAlert(transferType)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                } else {
+                    Toast.makeText(applicationContext, "Add product first...!", Toast.LENGTH_SHORT)
+                        .show()
                 }
             } else {
-                Toast.makeText(applicationContext, "Add product first...!", Toast.LENGTH_SHORT)
+                Toast.makeText(applicationContext, "Select Locations...!", Toast.LENGTH_SHORT)
                     .show()
             }
-        } else {
-            Toast.makeText(applicationContext, "Select Locations...!", Toast.LENGTH_SHORT)
-                .show()
-        }
-    } else if (item.itemId == R.id.action_scan) {
 
-        if (checkPermission()) {
-            scanFromFragment()
+        } else if (item.itemId == R.id.action_scan) {
+            if (transferType == "Transfer In") {
+                if (fromWarehouseCode!!.isNotEmpty()) {
+                    if (checkPermission()) {
+                        scanFromFragment()
+                    }
+                } else {
+                    Toast.makeText(applicationContext, "Select Locations...!", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            } else {
+                if (toWarehouseCode!!.isNotEmpty()) {
+                    if (checkPermission()) {
+                        scanFromFragment()
+                    }
+                } else {
+                    Toast.makeText(applicationContext, "Select Locations...!", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
+            //    scannedBarcode = ""
+        } else if (item.itemId == R.id.action_search) {
+
+            if (transferType == "Transfer In") {
+                if (fromWarehouseCode!!.isNotEmpty()) {
+                    showTranSearch_Dialog()
+                } else {
+                    Toast.makeText(applicationContext, "Select Locations...!", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            } else {
+                if (toWarehouseCode!!.isNotEmpty()) {
+                    showTranSearch_Dialog()
+                } else {
+                    Toast.makeText(applicationContext, "Select Locations...!", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
         }
-        //    scannedBarcode = ""
+
+        return true
     }
 
-    return true
-}
+    fun setTitle(title: String?) {
+        //Customize the ActionBar
+        val abar = supportActionBar
+        val viewActionBar = layoutInflater.inflate(R.layout.action_bar_title, null)
+        val params = ActionBar.LayoutParams( //Center the textview in the ActionBar !
+            ActionBar.LayoutParams.WRAP_CONTENT,
+            ActionBar.LayoutParams.MATCH_PARENT,
+            Gravity.LEFT
+        )
+        val textviewTitle = viewActionBar.findViewById<TextView>(R.id.actionbar_textview)
+        textviewTitle.text = title
+        Objects.requireNonNull(abar)!!.setCustomView(viewActionBar, params)
+        abar!!.setDisplayShowCustomEnabled(true)
+        abar.setDisplayShowTitleEnabled(false)
+        abar.setDisplayHomeAsUpEnabled(true)
+        abar.setHomeButtonEnabled(true)
+    }
 
-fun setTitle(title: String?) {
-    //Customize the ActionBar
-    val abar = supportActionBar
-    val viewActionBar = layoutInflater.inflate(R.layout.action_bar_title, null)
-    val params = ActionBar.LayoutParams( //Center the textview in the ActionBar !
-        ActionBar.LayoutParams.WRAP_CONTENT,
-        ActionBar.LayoutParams.MATCH_PARENT,
-        Gravity.CENTER
-    )
-    val textviewTitle = viewActionBar.findViewById<TextView>(R.id.actionbar_textview)
-    textviewTitle.text = title
-    Objects.requireNonNull(abar)!!.setCustomView(viewActionBar, params)
-    abar!!.setDisplayShowCustomEnabled(true)
-    abar.setDisplayShowTitleEnabled(false)
-    abar.setDisplayHomeAsUpEnabled(true)
-    abar.setHomeButtonEnabled(true)
-}
+    override fun onBackPressed() {
+        super.onBackPressed()
+        finish()
+    }
 
-override fun onBackPressed() {
-    super.onBackPressed()
-    finish()
-}
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
+    }
 
-override fun onSupportNavigateUp(): Boolean {
-    onBackPressed()
-    return true
-}
-
-companion object {
-    var currentDate: String? = null
-    var progressDialog: ProgressDialog? = null
-    var customerCode: String? = null
-    var isPrintEnable = false
-    var selectedBank: TextView? = null
-    var amountText: EditText? = null
-    var signatureString = ""
-    var imageString: String? = null
-}
+    companion object {
+        var currentDate: String? = null
+        var progressDialog: ProgressDialog? = null
+        var customerCode: String? = null
+        var isPrintEnable = false
+        var selectedBank: TextView? = null
+        var amountText: EditText? = null
+        var signatureString = ""
+        var imageString: String? = null
+    }
 }
